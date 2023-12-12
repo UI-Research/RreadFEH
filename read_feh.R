@@ -1,28 +1,14 @@
 
 library(tidyverse)
-library(data.table)
 
-setwd("D:/Users/DCosic/Box Sync/Projects/RreadFEH")
 source("read_codebook.R")
 
-fehfile <- "X:/FEHOutput/run_00958B/dynasipp_person_odd.dat"
+fehdir = "//SAS1/Dynasim/FEHOutput/run_01004/"
+fehfile <- paste0(fehdir, "dynasipp_person_even.dat")
+codebookfile = paste0(fehdir, "codebook_2100ds.sipp2006")
 
 # Read the codebook
-per_df <- parse_person_codebook("D:/Users/DCosic/Box Sync/Projects/RreadFEH/codebook_2087ds.sipp2006")
-
-get_rec_struct <- function(df)
-{
-  rec_struct <- as.character(df$name)
-  
-  arrays_df <- df %>%
-    filter(type=="array") %>%
-    select(name, start, end)
-  
-  rec_struct <- c(rec_struct, 
-                  unlist(apply(arrays_df, 1, function(x) paste0(x[1], x[2]:x[3]))))
-}
-
-rec_struct <- get_rec_struct(per_df)
+rec_struct <- get_col_names(codebookfile)
 rec_len <- length(rec_struct)
 
 # FEH file size
@@ -33,7 +19,7 @@ rec_num <- feh_file_size/4/rec_len
 
 # Number of observations to read
 obs_num <- rec_num
-#obs_num <- 1000
+obs_num <- 1000
 read_len <- obs_num * rec_len
 
 # Read raw FEH data

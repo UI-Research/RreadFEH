@@ -78,3 +78,22 @@ parse_family_codebook <- function(fname)
 
   return(parse_codebook_lines(fam_rec_lines))
 }
+
+df_to_col_names <- function(df)
+{
+  rec_struct <- as.character(df$name)
+  
+  arrays_df <- df %>%
+    filter(type=="array") %>%
+    select(name, start, end)
+  
+  rec_struct <- c(rec_struct, 
+                  unlist(apply(arrays_df, 1, function(x) paste0(x[1], x[2]:x[3]))))
+}
+
+get_col_names = function(codebook)
+{
+  per_df <- parse_person_codebook(codebook)
+  col_names <- df_to_col_names(per_df)
+  return(col_names)
+}
