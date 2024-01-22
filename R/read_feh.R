@@ -51,7 +51,7 @@ read_feh = function(codebookfile, fehfile, columns=NULL, obs_count=NA)
         df <- as.data.frame(feh_mat)
     
         if(!is.null(columns)) {
-            df = select(df, columns)
+            df = select(df, all_of(columns))
         }
         
         if(obs_read == 0) {
@@ -61,7 +61,7 @@ read_feh = function(codebookfile, fehfile, columns=NULL, obs_count=NA)
             feh_df = bind_rows(feh_df, df)
         }
         obs_read = obs_read + read_count
-        cat("Total=", format(obs_read, width=10, scientific=FALSE, big.mark=','), "\n")
+        cat("total =", format(obs_read, width=8, scientific=FALSE, big.mark=','), "\n")
     }
     return(feh_df)
 }
@@ -71,6 +71,7 @@ if(example) {
     fehdir = "S:/damir/run_1004/"
     fehfile <- paste0(fehdir, "dynasipp_person_even.dat")
     codebookfile = paste0(fehdir, "codebook_2100ds.sipp2006")
-    df = read_feh(codebookfile, fehfile, columns=c('PERNUM', 'DOBY', 'SEX', 'RACE', 'ETHNCTY'))
+    keep_cols = c('PERNUM', 'DOBY', 'SEX', 'RACE', 'ETHNCTY', paste0('GRADECAT', 2006:2100))
+    df = read_feh(codebookfile, fehfile, columns=keep_cols)
 }
 
