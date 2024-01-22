@@ -36,3 +36,31 @@ rec_struct <- get_col_names(paste0(here::here(), '/codebook_2087ds.sipp2006'))
 ```
 
 The `read_feh.R` file contains code that reads a DYNASIM output file, but this repo does not contain any sample output files.
+
+## Data
+
+### Sex
+
+Sex is encoded in variable SEX.
+
+* Men:   SEX==1
+* Women: SEX==2
+
+### Race and Ethnicity
+
+Race and ethnicity are encoded in variable ETHNCTY.
+
+* Asian:    4000 <= ETHNCTY <= 4999
+* Black:    2000 <= ETHNCTY <= 2999
+* Hispanic: 
+  * 1014 <= ETHNCTY <= 1020 or
+  * 2014 <= ETHNCTY <= 2020 or
+  * 3014 <= ETHNCTY <= 3020 or 
+  * 4014 <= ETHNCTY <= 4020
+* White:    1000 <= ETHNCTY <= 1999            
+* Other:    3000 <= ETHNCTY <= 3999
+
+### Education
+
+Educational attainment is encoded in the vector GRADECAT as the number of completed grades. It can take values from 0 to 18.
+

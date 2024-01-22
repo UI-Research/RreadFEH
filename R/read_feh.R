@@ -71,7 +71,7 @@ if(example) {
     fehdir = "S:/damir/run_1004/"
     fehfile <- paste0(fehdir, "dynasipp_person_even.dat")
     codebookfile = paste0(fehdir, "codebook_2100ds.sipp2006")
-    keep_cols = c('PERNUM', 'DOBY', 'SEX', 'RACE', 'ETHNCTY', paste0('GRADECAT', 2006:2100))
+    keep_cols = c('PERNUM', 'DOBY', 'SEX', 'RACE', 'ETHNCTY', 'YEARDIED', paste0('GRADECAT', 2006:2100))
     df = read_feh(codebookfile, fehfile, columns=keep_cols)
 }
 
