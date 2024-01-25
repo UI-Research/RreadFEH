@@ -32,6 +32,7 @@ read_feh = function(codebookfile, fehfile, columns=NULL, obs_count=NA)
     
     chunk_size = 50000
     
+    fehcon = file(fehfile, "rb")
     obs_read=0
     while(obs_read<obs_count) {
       
@@ -40,7 +41,7 @@ read_feh = function(codebookfile, fehfile, columns=NULL, obs_count=NA)
         
         # Read raw FEH data
         cat("Reading next ", format(read_count, width=6), " observations...")
-        rawdata <- readBin(fehfile, "integer", read_len, 4)
+        rawdata <- readBin(fehcon, "integer", read_len, 4)
 
         # Convert raw data into a matrix
         feh_mat <- matrix(rawdata, nrow=read_count, ncol=rec_len, byrow = T)
@@ -63,10 +64,11 @@ read_feh = function(codebookfile, fehfile, columns=NULL, obs_count=NA)
         obs_read = obs_read + read_count
         cat("total =", format(obs_read, width=8, scientific=FALSE, big.mark=','), "\n")
     }
+    close(fehcon)
     return(feh_df)
 }
 
-example=TRUE
+example=FALSE
 if(example) {
     fehdir = "S:/damir/run_1004/"
     fehfile <- paste0(fehdir, "dynasipp_person_even.dat")
