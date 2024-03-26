@@ -157,15 +157,67 @@ def read_feh_data_file(
     
     return np.fromfile(data_file, dtype=rectype, count=count)
 
+
+def feh_wide_to_long(widearr):
+    """Creates a long-format array for longitudinal variables in widearr
+
+    Args:
+        widearr (np.array): structured numpy array with longitudinal variables and "PERNUM"
+
+    Returns:
+        structured numpy array: long-format array with longitudinal variables from widearr
+    """
+
+    # List of years in the longitudinal variables
+    years = np.unique([int(x[-4:]) for x in widearr.dtype.names if x[-4:].isdigit()])
+
+    # The list of longitudinal variables in the wide format
+    mtswide = [x for x in widearr.dtype.names if x[-4:].isdigit()]
+
+    # The list of longitudinal variable names
+    mtslong = set([x[:-4] for x in mtswide])
+    mtslong = [x.lower() for x in mtslong]
+
+    # The list of variable names for the long array
+    longnames = ['year', 'pernum']
+    longnames.extend(mtslong)
+
+    # Dimensions
+    nper = widearr.shape[0]
+    nmtsw = len(mtswide)
+    nyears = len(years)
+    nrow = nper * nyears
+
+    # Create an empty array
+    rectype = np.dtype({'names':longnames, 'formats': ['i4']*len(longnames)})
+    longarr = np.zeros(nrow, rectype)
+
+    # Fill in pernum and year
+    longarr['pernum'] = np.tile(widearr['PERNUM'], nyears)
+    longarr['year']   = np.repeat(np.array(years), nper)
+
+    # For each year, fill in the rest of the variables
+    for y, year in enumerate(years):
+        yl = y*nper
+        yh = (y+1)*nper
+        yvarsw = [var for var in mtswide if str(year) in var]
+        yvarsl = [x[:-4].lower() for x in yvarsw]
+        longarr[yvarsl][yl:yh] = widearr[yvarsw]
+
+    return longarr
+
 if __name__ == '__main__':
 
-    header_file = 'C:/Users/dcosic/Documents/Dynasim/Dynasim-core/run/dynasipp_header_even.dat'
-    person_file = 'C:/Users/dcosic/Documents/Dynasim/Dynasim-core/run/dynasipp_person_even.dat'
-    family_file = 'C:/Users/dcosic/Documents/Dynasim/Dynasim-core/run/dynasipp_family_even.dat'
+    fehdir = '//SAS1/Dynasim/FEHOutput/run_01006/base_v8/'
+    header_file = fehdir + 'dynasipp_header_even.dat'
+    person_file = fehdir + 'dynasipp_person_even.dat'
+    family_file = fehdir + 'dynasipp_family_even.dat'
 
     perdata = read_feh_data_file(header_file, person_file, file_type='person', count=10)
     famdata = read_feh_data_file(header_file, family_file, file_type='family', count=10)
 
+    longarr = feh_wide_to_long(perdata)
+
     print(perdata)
-    print(famdata)
+    print(longarr)
 
