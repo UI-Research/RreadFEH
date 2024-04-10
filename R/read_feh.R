@@ -169,8 +169,9 @@ read_feh_cbk = function(codebookfile, fehfile, columns=NULL, obs_count=NA)
 #'
 feh_wide_to_long = function(data)
 {
+    widecols = colnames(data)
     # Time-series names
-    tsnames = tolower(unique(gsub("\\d{4}", "", grep("[A-Z]+\\d{4}", keep_cols, value = TRUE))))
+    tsnames = tolower(unique(gsub("\\d{4}", "", grep("[A-Z]+\\d{4}", widecols, value = TRUE))))
     match_pat = paste(paste0(tsnames, ".*"), collapse="|")
     names_pat = paste0("(", paste(tsnames, collapse = "|"), ")(\\d+)")
 
