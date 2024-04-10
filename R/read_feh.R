@@ -169,14 +169,22 @@ read_feh_cbk = function(codebookfile, fehfile, columns=NULL, obs_count=NA)
 #'
 feh_wide_to_long = function(data)
 {
+    data = data |>
+        rename_with(tolower)
+
     widecols = colnames(data)
+
     # Time-series names
-    tsnames = tolower(unique(gsub("\\d{4}", "", grep("[A-Z]+\\d{4}", widecols, value = TRUE))))
+    tsnames = unique(gsub("\\d{4}", "", grep("[a-z]+\\d{4}", widecols, value = TRUE)))
+
+    if( length(tsnames) == 0 ) {
+        return(data)
+    }
+
     match_pat = paste(paste0(tsnames, ".*"), collapse="|")
     names_pat = paste0("(", paste(tsnames, collapse = "|"), ")(\\d+)")
 
     df = data |>
-        rename_with(tolower) |>
         pivot_longer(
             matches(match_pat),
             names_to=c('.value', 'year'),
@@ -435,7 +443,7 @@ read_feh = function(fehdir, suffix="even", person=TRUE, columns=NULL, obs_count=
 
 
 example=FALSE
-test=TRUE
+test=FALSE
 if(example) {
     fehdir = "S:/damir/run_1004/"
     fehfile <- paste0(fehdir, "dynasipp_person_even.dat")
@@ -474,7 +482,7 @@ if(test) {
   df3 = read_feh(
       "X:/FEHInput/v2/",
       suffix=NULL,
-      obs_count=1e4
+      columns = c('PERNUM', 'EDINT', 'GRADECAT', 'DOBY')
   )
 
 }
