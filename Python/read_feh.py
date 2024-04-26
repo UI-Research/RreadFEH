@@ -20,7 +20,7 @@ import numpy as np
 import io
 
 
-def make_record_dict(file:io.BufferedReader):
+def make_record_dict(file:io.BufferedReader, sample:str):
     """Reads a section of a header file and creates a record dictionary
 
     Args:
@@ -41,12 +41,23 @@ def make_record_dict(file:io.BufferedReader):
     """
 
     res = {}
-
-    nsat, nmat, rlen, nmts = struct.unpack('2x10s10s10s10s2x', file.read(44))
-    res['nsat'] = int(nsat)
-    res['nmat'] = int(nmat)
-    res['rlen'] = int(rlen)
-    res['nmts'] = int(nmts)
+    if sample == "output":
+        nsat, nmat, rlen, nmts = struct.unpack('2x10s10s10s10s2x', file.read(44))
+        #print(int.from_bytes(nsat, byteorder="little", signed=True))
+        res['nsat'] = int(nsat)
+        res['nmat'] = int(nmat)
+        res['rlen'] = int(rlen)
+        res['nmts'] = int(nmts)
+    elif sample == "input":
+        unused = np.fromfile(file, dtype=np.uint8, count=2)
+        frame = np.fromfile(file, dtype=np.int32, count=4)
+        unused = np.fromfile(file, dtype=np.uint8, count=2)
+        res = {
+        "nsat": frame[0],
+        "nmat": frame[1],
+        "rlen": frame[2],
+        "nmts": frame[3]
+        }
 
     res['names'] = [''] * res['nsat']
     for i in range(res['nsat']):
@@ -102,7 +113,7 @@ def make_rec_dtype(rec:dict):
 
     return rectype
 
-def read_header_file(filename:str):
+def read_header_file(filename:str, sample:str):
     """Reads a DYNASIM header file and returns record dictionaries.
 
     Args:
@@ -116,20 +127,25 @@ def read_header_file(filename:str):
     with open(filename, 'rb') as file:
 
         # Read year from the first 10 bytes
-        year = file.read(10)
-        year = int(year)
+        if sample == "input": 
+            year = file.read(4)
+            year = int.from_bytes(year, byteorder="little", signed=True)
+        elif sample == "output": 
+            year = file.read(10)
+            year = int(year)
 
         # Make family-record dictionary
-        famrec = make_record_dict(file)
+        famrec = make_record_dict(file, sample = sample)
 
         # Make person-record dictionary
-        perrec = make_record_dict(file)
+        perrec = make_record_dict(file, sample = sample)
 
     return year, famrec, perrec
 
 def read_feh_data_file(
         header_file:str, 
-        data_file:str, 
+        data_file:str,
+        sample:str, 
         file_type:str='person', 
         count:int=-1):
     """Reads a DYNASIM data file
@@ -146,7 +162,7 @@ def read_feh_data_file(
         numpy structured array: data
     """
 
-    year, famrec, perrec = read_header_file(header_file)
+    year, famrec, perrec = read_header_file(header_file, sample=sample)
     
     if file_type == 'person':
         rectype = make_rec_dtype(perrec)
@@ -206,18 +222,57 @@ def feh_wide_to_long(widearr):
 
     return longarr
 
+def print_offsets(d):
+
+    print("offsets:", [d.fields[name][1] for name in d.names])
+
+    print("itemsize:", d.itemsize)
+
+def structured_shape(x):
+    if len(x.dtype) > 0:
+        return list(x.shape) + [len(x.dtype)]
+    else:
+        return x.shape
+
 if __name__ == '__main__':
 
-    fehdir = '//SAS1/Dynasim/FEHOutput/run_01006/base_v8/'
-    header_file = fehdir + 'dynasipp_header_even.dat'
-    person_file = fehdir + 'dynasipp_person_even.dat'
-    family_file = fehdir + 'dynasipp_family_even.dat'
+    sample_dic = {
+        "input": {
+            "header_file": 'sample/input/dynasipp_HEADER.dat',
+            "person_file": 'sample/input/dynasipp_PERSON.dat',
+            "family_file": 'sample/input/dynasipp_FAMILY.dat'
+        },
+        "output": {
+            "header_file": 'sample/output/dynasipp_header_even.dat',
+            "person_file": 'sample/output/dynasipp_person_even.dat',
+            "family_file": 'sample/output/dynasipp_family_even.dat'           
+        }
+    }
 
-    perdata = read_feh_data_file(header_file, person_file, file_type='person', count=10)
-    famdata = read_feh_data_file(header_file, family_file, file_type='family', count=10)
+    sample_type = "input"
+
+    header_file = sample_dic[sample_type]["header_file"]
+    person_file = sample_dic[sample_type]["person_file"]
+    family_file = sample_dic[sample_type]["family_file"]
+
+    perdata = read_feh_data_file(header_file, person_file, file_type='person', count=10, sample=sample_type)
+    famdata = read_feh_data_file(header_file, family_file, file_type='family', count=10, sample=sample_type)
 
     longarr = feh_wide_to_long(perdata)
-
-    print(perdata)
-    print(longarr)
-
+    print(perdata.dtype)
+    #print(perdata)
+    #print(longarr)
+    # pd = perdata.dtype
+    # # Flags
+    # print(perdata.flags)
+    # # Convert to record array
+    # for rec in recordarr:
+    #     print(rec.AGE)
+    # print(perdata.shape)
+    # print(structured_shape(perdata))
+    # Convert to record array
+    # recordarr = np.rec.array(perdata)
+    # print(recordarr[:].AGE)
+    # print(pd.names[0:10])
+    # for x in pd.names:
+    #     print(x[-4:])
