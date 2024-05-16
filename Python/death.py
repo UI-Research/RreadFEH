@@ -21,7 +21,7 @@ MAXAGE = 120
 MAXAGS = 121
 NAGEG = 50 # Number of Age Groups
 
-def ylgods(nvars: int, ylc: int, yval: int, labs: str, qdb: bool) -> int:
+def ylgods(ylc: int, yval: int) -> int:
     """
     YLGODS takes as input a vector of logistic coefficients and a vector of 
     variable values and returns the resulting probability. Debug mode is 
@@ -38,12 +38,9 @@ def ylgods(nvars: int, ylc: int, yval: int, labs: str, qdb: bool) -> int:
     Returns:
         xp: an integer containing the expected probability of death
     """
-    xb = 0.0
-    for i in range(nvars):
-        xb = xb + ylc[i] * yval[i]
-    if xb < -87.0:
-        xb = -87.0
-    xp = 1 / (1 + math.exp(-1 * xb))
+    xb = np.multiply(ylc, yval)
+    xb_sum = np.sum(xb)
+    xp = 1 / (1 + math.exp(-1 * xb_sum))
     return(xp)
 
 def modify_pve_ratio(pve_array: int) -> int:
@@ -72,10 +69,30 @@ def create_family_income(lfpart_arr: int, earnings_arr: int, famnum_arr: int) ->
     faminc_arr = np.multiply(lfpart_arr, earnings_arr)
     return(faminc_arr)
 
-def death_pers_sim(perdata: np.array) -> np.array:
+def determine_race(sex: int, race: int) -> int:
+    """
+    This function takes the FAMNUM, SEX and RACE arrays
+    from the input sample and return a RACETH array that codes
+    each person based on race and ethnicity
+    """
+    zblack = np.random.rand(np.ndarray.size(race), )
+
+
+
+def death_pers_sim(perdata: np.array, start_year: int) -> np.array:
     """
     This function runs the death simulation at the person level
     """
+    current_year = start_year
+    NCOEFA = 40 # Number of coefficients for adults
+    YAC = np.full((NCOEFA,), 1.00)
+    YAV = np.zeros((NCOEFA,), dtype = int)
+
+    YAV[[0]] = 1
+    YAV[[1]] = 0
+    # Figure out race variables
+    # if nnhsp == 1 or nathsp == 1: YAV[[2]] = 1
+
     # Load in necessary fields
     seed = perdata["PERSEED"]
     pernum = perdata["PERNUM"]
@@ -86,7 +103,16 @@ def death_pers_sim(perdata: np.array) -> np.array:
     kidsborn = perdata["KIDSBORN"]
     gradecat = perdata["GRADECAT"]
     splitid = perdata["SPLITID"]
+    earnings = perdata["EARNINGS"]
+    disabled = perdata["DISABLED"]
+    lfpart = perdata["LFPART"]
+    immigyr = perdata["IMMIGYR"]
+    dipred = perdata["DIPRED"]
     # ... lines 332-347
+    
+    #XP = YLGODS(YAC, YAV )
+    # each person gets an array
+
 
 
 ### There is a presimulation step that loads in coefficients ####
@@ -105,6 +131,6 @@ if __name__ == "__main__":
     rs = create_family_income(perdata["LFPART"],
                               perdata["EARNINGS"],
                               perdata["FAMNUM"])
-    print(perdata["SPLITID"])
+    print(perdata["RACE"])
     
     # run_death_simulation(perdata)
