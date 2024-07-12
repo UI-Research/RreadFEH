@@ -13,12 +13,9 @@ records. The function that reads DYNASIM data is read_feh_data_file.
 It requires paths to a header file and to one of the two data files.
 """
 
-
-
 import struct
 import numpy as np
 import io
-
 
 def make_record_dict(file:io.BufferedReader, sample:str):
     """Reads a section of a header file and creates a record dictionary
@@ -41,6 +38,7 @@ def make_record_dict(file:io.BufferedReader, sample:str):
     """
 
     res = {}
+
     if sample == "output":
         nsat, nmat, rlen, nmts = struct.unpack('2x10s10s10s10s2x', file.read(44))
         #print(int.from_bytes(nsat, byteorder="little", signed=True))
@@ -48,6 +46,7 @@ def make_record_dict(file:io.BufferedReader, sample:str):
         res['nmat'] = int(nmat)
         res['rlen'] = int(rlen)
         res['nmts'] = int(nmts)
+
     elif sample == "input":
         unused = np.fromfile(file, dtype=np.uint8, count=2)
         frame = np.fromfile(file, dtype=np.int32, count=4)
@@ -59,27 +58,33 @@ def make_record_dict(file:io.BufferedReader, sample:str):
         "nmts": frame[3]
         }
 
+    # Create names list
     res['names'] = [''] * res['nsat']
     for i in range(res['nsat']):
         res['names'][i] = str(file.read(8), 'utf-8')
 
+    # If there is at least 1 variable, initialize 0 vectors to be filled later
     if res['nmts'] > 0:
         file.read(2)
         res['mtsnm'] = [0]*res['nmts']
         res['mtsly'] = [0]*res['nmts']
         res['mtshy'] = [0]*res['nmts']
         res['mtsp']  = [0]*res['nmts']
+
+        # Populate mtsp, mtsly, mtshy, mtsp 0 vectors, read bytes as integers
         for i in range(res['nmts']):
             res['mtsnm'][i] = struct.unpack('i', file.read(4))[0]-1
+
         for i in range(res['nmts']):
             res['mtsly'][i] = struct.unpack('i', file.read(4))[0]
+
         for i in range(res['nmts']):
             res['mtshy'][i] = struct.unpack('i', file.read(4))[0]
+
         for i in range(res['nmts']):
             res['mtsp'][i] = struct.unpack('i', file.read(4))[0]
 
     return res
-
 
 def make_rec_dtype(rec:dict):
     """Creates a dtype object based on a record dictionary
@@ -92,7 +97,7 @@ def make_rec_dtype(rec:dict):
     """
     
     # Start with all variable names--these are scalar variables
-    names = [ n.strip() for n in rec['names']]
+    names = [n.strip() for n in rec['names']]
 
     # Now add MTS variables
     for i in range(rec['nmts']):
@@ -113,8 +118,10 @@ def make_rec_dtype(rec:dict):
 
     return rectype
 
-def read_header_file(filename:str, sample:str):
+def read_header_file(filename:str):
     """Reads a DYNASIM header file and returns record dictionaries.
+       Presumes the first 4 bytes of the starting sample file are '2006' and first 10 bytes of 
+       output sample are '2060'. If neither condition satisfied, error is raised.
 
     Args:
         filename (str): the path to a DYNASIM header file
@@ -125,14 +132,27 @@ def read_header_file(filename:str, sample:str):
 
     # Open header file
     with open(filename, 'rb') as file:
+        # Get the first 10 bytes
+        first_10_bytes = file.read(10)
 
-        # Read year from the first 10 bytes
-        if sample == "input": 
-            year = file.read(4)
-            year = int.from_bytes(year, byteorder="little", signed=True)
-        elif sample == "output": 
-            year = file.read(10)
-            year = int(year)
+        # Check if the first 4 bytes of the first 10 represent the year 2006
+        if int.from_bytes(first_10_bytes[:4], byteorder="little", signed=True) == 2006:
+            sample = 'input'
+            year = int.from_bytes(first_10_bytes[:4], byteorder="little", signed=True)
+            # Go back to the 4th byte to ensure the file is in the correct place
+            file.seek(4)
+        
+        # Check if the first 10 bytes represent the year 2060
+        elif int(first_10_bytes) == 2060:
+            # If output sample, need to move 6 more bytes
+            sample = 'output'
+            year = int(first_10_bytes)
+        
+        # If neither condition is met, raise an error
+        else:
+            raise ValueError( 'Invalid year in file header:\n'
+                              'The first 4 bytes should contain 2006 or 2060 to identify data.\n'
+                              f'First ten bytes, raw: {first_10_bytes}' )
 
         # Make family-record dictionary
         famrec = make_record_dict(file, sample = sample)
@@ -145,7 +165,6 @@ def read_header_file(filename:str, sample:str):
 def read_feh_data_file(
         header_file:str, 
         data_file:str,
-        sample:str, 
         file_type:str='person', 
         count:int=-1):
     """Reads a DYNASIM data file
@@ -162,12 +181,14 @@ def read_feh_data_file(
         numpy structured array: data
     """
 
-    year, famrec, perrec = read_header_file(header_file, sample=sample)
+    year, famrec, perrec = read_header_file(header_file)
     
     if file_type == 'person':
         rectype = make_rec_dtype(perrec)
+
     elif file_type == 'family':
         rectype = make_rec_dtype(famrec)
+
     else:
         raise ValueError(f"file_type can be 'person' or 'family' but not {file_type}")
     
@@ -238,14 +259,14 @@ if __name__ == '__main__':
 
     sample_dic = {
         "input": {
-            "header_file": 'sample/input/dynasipp_HEADER.dat',
-            "person_file": 'sample/input/dynasipp_PERSON.dat',
-            "family_file": 'sample/input/dynasipp_FAMILY.dat'
+            "header_file": '../data/starting-sample/v2/dynasipp_HEADER.dat',
+            "person_file": '../data/starting-sample/v2/dynasipp_PERSON.dat',
+            "family_file": '../data/starting-sample/v2/dynasipp_FAMILY.dat'
         },
         "output": {
-            "header_file": 'sample/output/dynasipp_header_even.dat',
-            "person_file": 'sample/output/dynasipp_person_even.dat',
-            "family_file": 'sample/output/dynasipp_family_even.dat'           
+            "header_file": '../data/output/run-1006-baseline/base-v8/dynasipp_header_even.dat',
+            "person_file": '../data/output/run-1006-baseline/base-v8/dynasipp_person_even.dat',
+            "family_file": '../data/output/run-1006-baseline/base-v8/dynasipp_family_even.dat'           
         }
     }
 
@@ -255,8 +276,8 @@ if __name__ == '__main__':
     person_file = sample_dic[sample_type]["person_file"]
     family_file = sample_dic[sample_type]["family_file"]
 
-    perdata = read_feh_data_file(header_file, person_file, file_type='person', count=10, sample=sample_type)
-    famdata = read_feh_data_file(header_file, family_file, file_type='family', count=10, sample=sample_type)
+    perdata = read_feh_data_file(header_file, person_file, file_type='person', count=10)
+    famdata = read_feh_data_file(header_file, family_file, file_type='family', count=10)
 
     longarr = feh_wide_to_long(perdata)
     print(perdata.dtype)
