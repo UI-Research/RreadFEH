@@ -144,11 +144,7 @@ def read_header_file(filename:str):
 
         ### CONDITIONS TO IDENTIFY OUTPUT FILE
         # Check if first 6 bytes represent empty space designated by 0x20202020
-        # Check if the the last 4 bytes are an ASCI code that could represent a year
-        empty_space = first_10_bytes[:6] == b'\x20\x20\x20\x20\x20\x20'
-        # Check if the last 4 bytes could represent an ASCII year
-        ascii_year = first_10_bytes[6:10].decode('ascii')
-        output_conditions = empty_space and ascii_year.isdigit() and 2060 <= int(ascii_year) <= 2200
+        output_conditions = first_10_bytes[:6] == b'\x20\x20\x20\x20\x20\x20'
 
         if input_conditions:
             sample = 'input'
