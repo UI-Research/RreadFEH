@@ -16,6 +16,7 @@ It requires paths to a header file and to one of the two data files.
 import struct
 import numpy as np
 import io
+import numpy.lib.recfunctions as rf
 
 def make_record_dict(file:io.BufferedReader, sample:str):
     """Reads a section of a header file and creates a record dictionary
@@ -23,6 +24,7 @@ def make_record_dict(file:io.BufferedReader, sample:str):
     Args:
         file (io.BufferedReader): a file object pointing to the 
         beginning of a header section.
+        sample (str): 'input' or 'output' to indicate the type of sample
 
     Returns:
         dict: A dictionary with the following elements:
@@ -57,7 +59,6 @@ def make_record_dict(file:io.BufferedReader, sample:str):
         "rlen": frame[2],
         "nmts": frame[3]
         }
-
     # Create names list
     res['names'] = [''] * res['nsat']
     for i in range(res['nsat']):
@@ -167,6 +168,7 @@ def read_header_file(filename:str):
                               'This year should be between 2060 and 2200\n\n'
                               f'First ten bytes, raw: {first_10_bytes}' )
 
+        # Advance through header file in order of where family and person records are stored
         # Make family-record dictionary
         famrec = make_record_dict(file, sample = sample)
 
@@ -178,6 +180,7 @@ def read_header_file(filename:str):
 def read_feh_data_file(
         header_file:str, 
         data_file:str,
+        vars:list = None,
         file_type:str='person', 
         count:int=-1):
     """Reads a DYNASIM data file
@@ -194,6 +197,7 @@ def read_feh_data_file(
         numpy structured array: data
     """
 
+    # Initialize family and person dictionaries and numeric year
     year, famrec, perrec = read_header_file(header_file)
     
     if file_type == 'person':
@@ -205,7 +209,21 @@ def read_feh_data_file(
     else:
         raise ValueError(f"file_type can be 'person' or 'family' but not {file_type}")
     
-    return np.fromfile(data_file, dtype=rectype, count=count)
+    data = np.fromfile(data_file, dtype=rectype, count=count)
+
+    # Change name to reflect names in varlist, if provided
+    if vars is not None:
+        try:
+            # Subset to selected vars
+            data = data[vars]
+            # Repack fields to ensure consistency between data formats
+            # Otherwise numpy will do some transformations to the structured array after subsetting
+            data = rf.repack_fields(data)
+        except:
+            raise ValueError(f"At least one variable not found in {data_file}:\n{vars}\n"
+                             f"\nAvailable variables are:\n{data.dtype.names}")
+    
+    return data
 
 
 def feh_wide_to_long(widearr):
@@ -267,46 +285,3 @@ def structured_shape(x):
         return list(x.shape) + [len(x.dtype)]
     else:
         return x.shape
-
-if __name__ == '__main__':
-
-    sample_dic = {
-        "input": {
-            "header_file": '../data/starting-sample/v2/dynasipp_HEADER.dat',
-            "person_file": '../data/starting-sample/v2/dynasipp_PERSON.dat',
-            "family_file": '../data/starting-sample/v2/dynasipp_FAMILY.dat'
-        },
-        "output": {
-            "header_file": '../data/output/run-1006-baseline/base-v8/dynasipp_header_even.dat',
-            "person_file": '../data/output/run-1006-baseline/base-v8/dynasipp_person_even.dat',
-            "family_file": '../data/output/run-1006-baseline/base-v8/dynasipp_family_even.dat'           
-        }
-    }
-
-    sample_type = "input"
-
-    header_file = sample_dic[sample_type]["header_file"]
-    person_file = sample_dic[sample_type]["person_file"]
-    family_file = sample_dic[sample_type]["family_file"]
-
-    perdata = read_feh_data_file(header_file, person_file, file_type='person', count=10)
-    famdata = read_feh_data_file(header_file, family_file, file_type='family', count=10)
-
-    longarr = feh_wide_to_long(perdata)
-    print(perdata.dtype)
-    #print(perdata)
-    #print(longarr)
-    # pd = perdata.dtype
-    # # Flags
-    # print(perdata.flags)
-    # # Convert to record array
-    # for rec in recordarr:
-    #     print(rec.AGE)
-    # print(perdata.shape)
-    # print(structured_shape(perdata))
-    # Convert to record array
-    # recordarr = np.rec.array(perdata)
-    # print(recordarr[:].AGE)
-    # print(pd.names[0:10])
-    # for x in pd.names:
-    #     print(x[-4:])
