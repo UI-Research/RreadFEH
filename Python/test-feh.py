@@ -62,7 +62,7 @@ if __name__ == '__main__':
 
     print('TEST SAVE FUNCTIONS')
 
-    # Test the save function for files to .dat
+    # Test the save function for files to parquet format
     output_path = 'data/output/run-1006-baseline/base-v8/'
     save_feh_parquet(data_person_out, output_path, filename='person_out')
     output_path = 'data/starting-sample/v2/'

@@ -17,6 +17,9 @@ import struct
 import numpy as np
 import io
 import numpy.lib.recfunctions as rf
+import pyarrow.parquet as pq # for parquet file format
+import pyarrow as pa # for pyarrow functions format
+import pandas as pd
 
 def make_record_dict(file:io.BufferedReader, sample:str):
     """Reads a section of a header file and creates a record dictionary
@@ -285,3 +288,69 @@ def structured_shape(x):
         return list(x.shape) + [len(x.dtype)]
     else:
         return x.shape
+
+# Attempt 1- read parquet file then convert to structured numpy array
+def read_parquet_1(file_path:str):
+    """Reads a parquet-format array created by save_feh_parquet() 
+       and converts it to a structured numpy array.
+
+    Args:
+        file_path (str): path to read the data from parquet. 
+
+    Returns:
+        structured numpy array: data 
+    """
+    # Step 1: Read the Parquet file into a PyArrow Table
+    table_test = pq.read_table(file_path)
+
+    # Step 2: Extract schema information
+    columns = table_test.column_names
+    types = table_test.schema.types
+
+    # Step 3: Define a mapping between PyArrow types and NumPy types
+    arrow_to_numpy_dtype = {
+        pa.int8(): np.int8,
+        pa.int16(): np.int16,
+        pa.int32(): np.int32,
+        pa.int64(): np.int64,
+        pa.uint8(): np.uint8,
+        pa.uint16(): np.uint16,
+        pa.uint32(): np.uint32,
+        pa.uint64(): np.uint64,
+        pa.float32(): np.float32,
+        pa.float64(): np.float64,
+        pa.string(): 'U',  # Unicode string
+    }
+
+    # Step 4: Create a structured array dtype
+    dtype = [(col, arrow_to_numpy_dtype[type_]) for col, type_ in zip(columns, types)]
+
+    # Step 5: Convert PyArrow Table to a dictionary of NumPy arrays
+    data = {col: table_test[col].to_numpy() for col in table_test.column_names}
+
+    # Step 6: Create a structured NumPy array from the dictionary
+    structured_array = np.empty(len(table_test), dtype=dtype)
+    for col in table_test.column_names:
+        structured_array[col] = data[col]
+
+    return structured_array
+
+# Attempt 2- read parquet file then convert to structured numpy array using default pandas functionality
+# Slightly more efficienct than attempt 1 it seems, still less efficient than binary
+def read_parquet_2(file_path):
+    """Reads a parquet-format array created by save_feh_parquet() 
+       and converts it to a structured numpy array.
+
+    Args:
+        file_path (str): path to read the data from parquet. 
+
+    Returns:
+        structured numpy array: data 
+    """
+    # Step 1: Read the Parquet file into a pandas DataFrame
+    df = pq.read_table(file_path).to_pandas()
+
+    # Step 2: Convert the DataFrame to a structured numpy array
+    structured_array = df.to_records(index=False)
+
+    return structured_array
