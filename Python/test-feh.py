@@ -4,8 +4,8 @@ Test for DYNASIM FEH package.
 This script tests the DYNASIM feh_io module.
 """
 
-from feh_io.read_feh.read_feh import read_feh_data_file, read_parquet_2
-from feh_io.save_feh.save_feh import save_feh_parquet
+from feh_io.read_feh import read_feh_data_file, read_parquet_2
+from feh_io.save_feh import save_feh_parquet
 
 def test_read_feh_data_file(header_file, data_file, file_type, vars=None):
     """
