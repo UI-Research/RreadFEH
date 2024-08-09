@@ -5,4 +5,4 @@
 /data 
 __pycache__/
 /build
-/feh_io.egg-info
+feh_io/feh_io.egg-info

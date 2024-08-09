@@ -4,7 +4,7 @@ Test for DYNASIM FEH package.
 This script tests the DYNASIM feh_io module.
 """
 
-from feh_io.read_feh import read_feh_data_file
+from feh_io.read_feh import read_feh_data_file, read_parquet_2
 from feh_io.save_feh import save_feh_parquet
 
 def test_read_feh_data_file(header_file, data_file, file_type, vars=None):
@@ -26,6 +26,27 @@ def test_read_feh_data_file(header_file, data_file, file_type, vars=None):
     print(f'Test: {file_type}-level records from {data_file} with vars={vars}')
     # Print column names
     print(data_out.dtype.names)
+    # Print first record
+    print(data_out)
+    input("Press Enter to continue...\n\n")  # Pause here
+    
+    return data_out
+
+def test_read_parquet_data_file(file_path:str, file_type:str, sample_type:str):
+    """
+    Args:
+        file_path (str): path to read the data from parquet. 
+        file_type (str): type of file being read ('person' or 'family').
+        sample_type (str): type of sample being read ('input' or 'output').
+
+    Returns:
+        structured numpy array: data 
+    """
+    # Test the read function with the provided file type and vars
+    data_out = read_parquet_2(file_path)
+    
+    # Describe case
+    print(f'Test: records from {file_path} for {file_type}-type {sample_type} records')
     # Print first record
     print(data_out)
     input("Press Enter to continue...\n\n")  # Pause here
@@ -69,10 +90,10 @@ if __name__ == '__main__':
     save_feh_parquet(data_person_in, output_path, filename='person_in')
 
     # If we read back in, do these files match?
-    in_person_file = 'data/starting-sample/v2/person_in.dat'
-    out_person_file = 'data/output/run-1006-baseline/base-v8/person_out.dat'
-    data_person_in_post_io = test_read_feh_data_file(in_header_file, in_person_file, vars = None, file_type='person')
-    data_person_out_post_io = test_read_feh_data_file(out_header_file, out_person_file, vars = None, file_type='person')
+    in_person_file = 'data/starting-sample/v2/person_in.parquet'
+    out_person_file = 'data/output/run-1006-baseline/base-v8/person_out.parquet'
+    data_person_in_post_io = test_read_parquet_data_file(in_person_file, file_type='person', sample_type = 'input')
+    data_person_out_post_io = test_read_parquet_data_file(out_person_file, file_type='person', sample_type = 'output')
 
     print(f'Do the original input person files match what is output by this package? {data_person_in_post_io == data_person_in}')
     print(f'Do the original output person files match what is output by this package? {data_person_out_post_io == data_person_out}')

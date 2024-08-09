@@ -23,7 +23,7 @@ def save_feh_parquet(data, out_path:str, filename:str):
 
     Args:
         data (np.array): structured numpy array
-        out_path (str): path to save the data ex. 
+        out_path (str): path to save the data ex. save
         filename (str): name of the file to save the data as
 
     Returns:
