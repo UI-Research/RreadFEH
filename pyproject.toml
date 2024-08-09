@@ -9,6 +9,9 @@
 requires = ["setuptools>=72.1.0", "wheel"]
 build-backend = "setuptools.build_meta"
 
+[tool.setuptools.packages.find]
+where = ["src/"]
+
 [project]
 name = "feh_io"
 version = "1.0.0"
@@ -35,6 +38,3 @@ dependencies = [
 
 [project.urls]
 Homepage = "https://github.com/UI-Research/RreadFEH/feh_io"
-
-[tool.setuptools.packages.find]
-where = ["feh_io"]
