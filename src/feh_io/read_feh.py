@@ -16,6 +16,10 @@ It requires paths to a header file and to one of the two data files.
 import struct
 import numpy as np
 import io
+import numpy.lib.recfunctions as rf
+import pyarrow.parquet as pq # for parquet file format
+import pyarrow as pa # for pyarrow functions format
+import pandas as pd
 
 def make_record_dict(file:io.BufferedReader, sample:str):
     """Reads a section of a header file and creates a record dictionary
@@ -23,6 +27,7 @@ def make_record_dict(file:io.BufferedReader, sample:str):
     Args:
         file (io.BufferedReader): a file object pointing to the 
         beginning of a header section.
+        sample (str): 'input' or 'output' to indicate the type of sample
 
     Returns:
         dict: A dictionary with the following elements:
@@ -57,7 +62,6 @@ def make_record_dict(file:io.BufferedReader, sample:str):
         "rlen": frame[2],
         "nmts": frame[3]
         }
-
     # Create names list
     res['names'] = [''] * res['nsat']
     for i in range(res['nsat']):
@@ -167,6 +171,7 @@ def read_header_file(filename:str):
                               'This year should be between 2060 and 2200\n\n'
                               f'First ten bytes, raw: {first_10_bytes}' )
 
+        # Advance through header file in order of where family and person records are stored
         # Make family-record dictionary
         famrec = make_record_dict(file, sample = sample)
 
@@ -178,6 +183,7 @@ def read_header_file(filename:str):
 def read_feh_data_file(
         header_file:str, 
         data_file:str,
+        vars:list = None,
         file_type:str='person', 
         count:int=-1):
     """Reads a DYNASIM data file
@@ -194,6 +200,7 @@ def read_feh_data_file(
         numpy structured array: data
     """
 
+    # Initialize family and person dictionaries and numeric year
     year, famrec, perrec = read_header_file(header_file)
     
     if file_type == 'person':
@@ -205,7 +212,21 @@ def read_feh_data_file(
     else:
         raise ValueError(f"file_type can be 'person' or 'family' but not {file_type}")
     
-    return np.fromfile(data_file, dtype=rectype, count=count)
+    data = np.fromfile(data_file, dtype=rectype, count=count)
+
+    # Change name to reflect names in varlist, if provided
+    if vars is not None:
+        try:
+            # Subset to selected vars
+            data = data[vars]
+            # Repack fields to ensure consistency between data formats
+            # Otherwise numpy will do some transformations to the structured array after subsetting
+            data = rf.repack_fields(data)
+        except:
+            raise ValueError(f"At least one variable not found in {data_file}:\n{vars}\n"
+                             f"\nAvailable variables are:\n{data.dtype.names}")
+    
+    return data
 
 
 def feh_wide_to_long(widearr):
@@ -268,45 +289,68 @@ def structured_shape(x):
     else:
         return x.shape
 
-if __name__ == '__main__':
+# Attempt 1- read parquet file then convert to structured numpy array
+def read_parquet_1(file_path:str):
+    """Reads a parquet-format array created by save_feh_parquet() 
+       and converts it to a structured numpy array.
 
-    sample_dic = {
-        "input": {
-            "header_file": '../data/starting-sample/v2/dynasipp_HEADER.dat',
-            "person_file": '../data/starting-sample/v2/dynasipp_PERSON.dat',
-            "family_file": '../data/starting-sample/v2/dynasipp_FAMILY.dat'
-        },
-        "output": {
-            "header_file": '../data/output/run-1006-baseline/base-v8/dynasipp_header_even.dat',
-            "person_file": '../data/output/run-1006-baseline/base-v8/dynasipp_person_even.dat',
-            "family_file": '../data/output/run-1006-baseline/base-v8/dynasipp_family_even.dat'           
-        }
+    Args:
+        file_path (str): path to read the data from parquet. 
+
+    Returns:
+        structured numpy array: data 
+    """
+    # Step 1: Read the Parquet file into a PyArrow Table
+    table_test = pq.read_table(file_path)
+
+    # Step 2: Extract schema information
+    columns = table_test.column_names
+    types = table_test.schema.types
+
+    # Step 3: Define a mapping between PyArrow types and NumPy types
+    arrow_to_numpy_dtype = {
+        pa.int8(): np.int8,
+        pa.int16(): np.int16,
+        pa.int32(): np.int32,
+        pa.int64(): np.int64,
+        pa.uint8(): np.uint8,
+        pa.uint16(): np.uint16,
+        pa.uint32(): np.uint32,
+        pa.uint64(): np.uint64,
+        pa.float32(): np.float32,
+        pa.float64(): np.float64,
+        pa.string(): 'U',  # Unicode string
     }
 
-    sample_type = "input"
+    # Step 4: Create a structured array dtype
+    dtype = [(col, arrow_to_numpy_dtype[type_]) for col, type_ in zip(columns, types)]
 
-    header_file = sample_dic[sample_type]["header_file"]
-    person_file = sample_dic[sample_type]["person_file"]
-    family_file = sample_dic[sample_type]["family_file"]
+    # Step 5: Convert PyArrow Table to a dictionary of NumPy arrays
+    data = {col: table_test[col].to_numpy() for col in table_test.column_names}
 
-    perdata = read_feh_data_file(header_file, person_file, file_type='person', count=10)
-    famdata = read_feh_data_file(header_file, family_file, file_type='family', count=10)
+    # Step 6: Create a structured NumPy array from the dictionary
+    structured_array = np.empty(len(table_test), dtype=dtype)
+    for col in table_test.column_names:
+        structured_array[col] = data[col]
 
-    longarr = feh_wide_to_long(perdata)
-    print(perdata.dtype)
-    #print(perdata)
-    #print(longarr)
-    # pd = perdata.dtype
-    # # Flags
-    # print(perdata.flags)
-    # # Convert to record array
-    # for rec in recordarr:
-    #     print(rec.AGE)
-    # print(perdata.shape)
-    # print(structured_shape(perdata))
-    # Convert to record array
-    # recordarr = np.rec.array(perdata)
-    # print(recordarr[:].AGE)
-    # print(pd.names[0:10])
-    # for x in pd.names:
-    #     print(x[-4:])
+    return structured_array
+
+# Attempt 2- read parquet file then convert to structured numpy array using default pandas functionality
+# Slightly more efficienct than attempt 1 it seems, still less efficient than binary
+def read_parquet_2(file_path):
+    """Reads a parquet-format array created by save_feh_parquet() 
+       and converts it to a structured numpy array.
+
+    Args:
+        file_path (str): path to read the data from parquet. 
+
+    Returns:
+        structured numpy array: data 
+    """
+    # Step 1: Read the Parquet file into a pandas DataFrame
+    df = pq.read_table(file_path).to_pandas()
+
+    # Step 2: Convert the DataFrame to a structured numpy array
+    structured_array = df.to_records(index=False)
+
+    return structured_array

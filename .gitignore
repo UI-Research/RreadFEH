@@ -3,3 +3,6 @@
 .RData
 .Ruserdata
 /data 
+__pycache__/
+/build
+feh_io/feh_io.egg-info
