@@ -1,5 +1,5 @@
 """
-Test for DYNASIM FEH package.
+Tests for DYNASIM FEH package.
 
 This script tests the DYNASIM feh_io module.
 """
@@ -7,7 +7,7 @@ This script tests the DYNASIM feh_io module.
 from feh_io import read_feh_data_file, save_feh_parquet
 from feh_io.read_feh import read_parquet_2
 
-def test_read_feh_data_file(header_file, data_file, file_type, vars=None):
+def test_var_selection_read_feh(header_file, data_file, file_type, vars=['SEGTYPE','ETHNCTY']):
     """
     Unit test for reading FEH data files. Pauses between each output for observation.
 
@@ -22,17 +22,12 @@ def test_read_feh_data_file(header_file, data_file, file_type, vars=None):
     data_out = read_feh_data_file(header_file, data_file, vars=vars,
                                          file_type=file_type, count=1)
     
-    # Describe case
-    print(f'Test: {file_type}-level records from {data_file} with vars={vars}')
     # Print column names
-    print(data_out.dtype.names)
-    # Print first record
-    print(data_out)
-    input("Press Enter to continue...\n\n")  # Pause here
+    assert all(var in data_out.dtype.names for var in vars), "all expected vars not present"
     
     return data_out
 
-def test_read_parquet_data_file(file_path:str, file_type:str, sample_type:str):
+def test_read_parquet(file_path:str, vars=['SEGTYPE','ETHNCTY']):
     """
     Args:
         file_path (str): path to read the data from parquet. 
@@ -46,10 +41,7 @@ def test_read_parquet_data_file(file_path:str, file_type:str, sample_type:str):
     data_out = read_parquet_2(file_path)
     
     # Describe case
-    print(f'Test: records from {file_path} for {file_type}-type {sample_type} records')
-    # Print first record
-    print(data_out)
-    input("Press Enter to continue...\n\n")  # Pause here
+
     
     return data_out
 
