@@ -184,8 +184,9 @@ def read_feh_data_file(
         header_file:str, 
         data_file:str,
         vars:list = None,
-        file_type:str='person', 
-        count:int=-1):
+        file_type:str = 'person', 
+        count:int = -1,
+        offset:int = 0):
     """Reads a DYNASIM data file
 
     Args:
@@ -195,6 +196,8 @@ def read_feh_data_file(
             'person'.
         count (int, optional): number of records to read, all if -1. 
             Defaults to -1.
+        offset (int, optional): number of bytes to skip before reading.
+            Defaults to 0.
 
     Returns:
         numpy structured array: data
@@ -212,7 +215,7 @@ def read_feh_data_file(
     else:
         raise ValueError(f"file_type can be 'person' or 'family' but not {file_type}")
     
-    data = np.fromfile(data_file, dtype=rectype, count=count)
+    data = np.fromfile(data_file, dtype=rectype, count=count, offset=offset)
 
     # Change name to reflect names in varlist, if provided
     if vars is not None:
