@@ -13,6 +13,7 @@ This module defines classes that can be used to edit those functionalities.
 """
 from read_feh import read_feh_data_file
 import os
+import numpy as np
 
 class FehReader:
     """
