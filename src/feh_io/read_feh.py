@@ -180,10 +180,35 @@ def read_header_file(filename:str):
 
     return year, famrec, perrec
 
+def select_vars(data, var_list:list):
+    """Selects a var from a structured array and repacks array
+       Repacking removes unnecessary padding bytes.
+
+    Args:
+        data (np.array): a processed DYNASIM data file
+        var_list (list): a list of variables to select from the data file
+
+    Returns:
+        numpy structured array: data
+    """
+    try:
+        # Subset to selected vars
+        data = data[var_list]
+        # Repack fields to ensure consistency between data formats
+        # Otherwise numpy will do some transformations to the structured array after subsetting
+        data = rf.repack_fields(data)
+
+    except:
+        missing_vars = [var for var in var_list if var not in data.dtype.names]
+        raise ValueError(f"Fields missing from the data:\n{missing_vars}\n"
+                         f"\nAvailable variables are:\n{data.dtype.names}")
+    
+    return data
+
 def read_feh_data_file(
         header_file:str, 
         data_file:str,
-        vars:list = None,
+        var_list:list = None,
         file_type:str = 'person', 
         count:int = -1,
         offset:int = 0):
@@ -218,19 +243,10 @@ def read_feh_data_file(
     data = np.fromfile(data_file, dtype=rectype, count=count, offset=offset)
 
     # Change name to reflect names in varlist, if provided
-    if vars is not None:
-        try:
-            # Subset to selected vars
-            data = data[vars]
-            # Repack fields to ensure consistency between data formats
-            # Otherwise numpy will do some transformations to the structured array after subsetting
-            data = rf.repack_fields(data)
-        except:
-            raise ValueError(f"At least one variable not found in {data_file}:\n{vars}\n"
-                             f"\nAvailable variables are:\n{data.dtype.names}")
+    if var_list is not None:
+        data = select_vars(data, var_list)
     
     return data
-
 
 def feh_wide_to_long(widearr):
     """Creates a long-format array for longitudinal variables in widearr
