@@ -21,7 +21,6 @@ class FehReader:
     """
     def __init__(self, header_file:str, data_file:str, file_type:str, chunk_size:int=-1, var_list:list=None):
         # Initialize file held as empty. File is opened/closed when read is called.
-        self.file = None
         self.file_size = os.path.getsize(data_file)
         self.data_file = data_file
         self.header_file = header_file
@@ -49,9 +48,8 @@ class FehReader:
             raise ValueError(f"Invalid file type: {self.file_type}." 
                              f"Must be input as '{'person'}' or '{'family'}'.")
 
-    # Reset the data read in and the bytes read in
+    # Reset the bytes read in
     def reset_data(self):
-        self.file = None
         self.bytes_read = 0
 
     # Set chunk size, clear data read and reset cursor
@@ -93,7 +91,7 @@ class FehReader:
     def read_chunk(self):
 
         # Read in data file, get bytes read in
-        self.file = read_feh_data_file( header_file = self.header_file, 
+        file = read_feh_data_file( header_file = self.header_file, 
                                         data_file = self.data_file,
                                         vars = self.var_list,
                                         file_type = self.file_type, 
@@ -102,5 +100,7 @@ class FehReader:
 
         # Calculate size of chunk in bytes and update
         self.bytes_read += self.calc_bytes_read()
+
+        return file
         
         return self.file
