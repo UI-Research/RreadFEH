@@ -11,7 +11,7 @@ DYNASIM FEH produces three files:
 read_feh and save_feh modules define functionality for accessing, processing, and writing files.
 This module defines classes that can be used to edit those functionalities.
 """
-from read_feh import read_feh_data_file
+from feh_io.read_feh import read_feh_data_file, read_header_file, make_rec_dtype
 import os
 import numpy as np
 
@@ -66,26 +66,41 @@ class FehReader:
         self.var_list = var_list
         self.reset_data()
 
-    # If bytes read up to this point + new chunk size is greater than file size,
-    # set chunk size to be the difference between file size and bytes read
-    def check_chunk_size(self):
-        if self.bytes_read + self.chunk_size > self.file_size:
-            return self.file_size - self.bytes_read 
+    # calculate how many bytes are read in for a chunk
+    def calc_bytes_read(self):
+        # Initialize family and person dictionaries and numeric year
+        year, famrec, perrec = read_header_file(self.header_file)
+        
+        if self.file_type == 'person':
+            rectype = make_rec_dtype(perrec)
+
+        elif self.file_type == 'family':
+            rectype = make_rec_dtype(famrec)
+
+        # Size of chunk = -1 means read in the entire file
+        if self.chunk_size == -1:
+            bytes_read = self.file_size
         else:
-            return self.chunk_size
+            bytes_read = rectype.itemsize * self.chunk_size
+
+        # bytes_read being larger than filesize means that np.fromfile 
+        # attempted to read that many bytes, but stopped early because it reached the end of the file.
+        if bytes_read + self.bytes_read > self.file_size:
+            bytes_read = self.file_size - self.bytes_read
+        return bytes_read
     
     # Read data file
     def read_chunk(self):
-        # Need to set this so that we don't read past the end of the file
-        reader_chunk_size = self.check_chunk_size()
 
-        # Read in data file
+        # Read in data file, get bytes read in
         self.file = read_feh_data_file( header_file = self.header_file, 
                                         data_file = self.data_file,
                                         vars = self.var_list,
                                         file_type = self.file_type, 
-                                        count = reader_chunk_size,
+                                        count = self.chunk_size,
                                         offset = self.bytes_read)
-        self.bytes_read += len(self.reader_chunk_size)
+
+        # Calculate size of chunk in bytes and update
+        self.bytes_read += self.calc_bytes_read()
         
         return self.file
