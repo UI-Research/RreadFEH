@@ -11,7 +11,7 @@ DYNASIM FEH produces three files:
 read_feh and save_feh modules define functionality for accessing, processing, and writing files.
 This module defines classes that can be used to edit those functionalities.
 """
-from feh_io.read_feh import read_feh_data_file, read_header_file, make_rec_dtype
+from feh_io.read_feh import read_feh_data_file, read_header_file, make_rec_dtype, select_vars
 import os
 import numpy as np
 
@@ -63,29 +63,6 @@ class FehReader:
             raise TypeError("Variables must be input as a list.")
         self.var_list = var_list
         self.reset_data()
-
-    # calculate how many bytes are read in for a chunk
-    def calc_bytes_read(self):
-        # Initialize family and person dictionaries and numeric year
-        year, famrec, perrec = read_header_file(self.header_file)
-        
-        if self.file_type == 'person':
-            rectype = make_rec_dtype(perrec)
-
-        elif self.file_type == 'family':
-            rectype = make_rec_dtype(famrec)
-
-        # Size of chunk = -1 means read in the entire file
-        if self.chunk_size == -1:
-            bytes_read = self.file_size
-        else:
-            bytes_read = rectype.itemsize * self.chunk_size
-
-        # bytes_read being larger than filesize means that np.fromfile 
-        # attempted to read that many bytes, but stopped early because it reached the end of the file.
-        if bytes_read + self.bytes_read > self.file_size:
-            bytes_read = self.file_size - self.bytes_read
-        return bytes_read
     
     # Read data file
     def read_chunk(self):
@@ -93,14 +70,16 @@ class FehReader:
         # Read in data file, get bytes read in
         file = read_feh_data_file( header_file = self.header_file, 
                                         data_file = self.data_file,
-                                        vars = self.var_list,
+                                        var_list = None,
                                         file_type = self.file_type, 
                                         count = self.chunk_size,
                                         offset = self.bytes_read)
+        
+        # Get number of bytes read in
+        self.bytes_read += file.nbytes
 
-        # Calculate size of chunk in bytes and update
-        self.bytes_read += self.calc_bytes_read()
+        # Select variables if var_list is not None
+        if self.var_list is not None:
+            file = select_vars(file, self.var_list)
 
         return file
-        
-        return self.file
