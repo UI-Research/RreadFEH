@@ -6,7 +6,8 @@
 <!-- badges: start -->
 <!-- badges: end -->
 
-The goal of FEHreadR is to …
+FEHreadR provides a set of functions for reading and manipulating files
+created by DYNASIM’s FEH module.
 
 ## Installation
 
