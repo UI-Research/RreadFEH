@@ -178,16 +178,21 @@ feh_wide_to_long = function(data)
     widecols = colnames(data)
 
     # Time-series names
-    tsnames = unique(gsub("\\d{4}", "", grep("[a-z]+\\d{4}", widecols, value = TRUE)))
+    tsnames = unique(gsub("\\d{4}$", "", grep("[a-z].+\\d{4}$", widecols, value = TRUE)))
 
     if( length(tsnames) == 0 ) {
         return(data)
     }
 
+    # Regex for dropping scalars associated with time series
+    selct_pat = paste(paste0(tsnames,"$"), collapse="|")
+    # Regex for selecting columns to pivot to longer
     match_pat = paste(paste0(tsnames, ".*"), collapse="|")
+    # Regex for the names patternt
     names_pat = paste0("(", paste(tsnames, collapse = "|"), ")(\\d+)")
 
     df = data |>
+        dplyr::select(-tidyselect::matches(selct_pat)) |>
         tidyr::pivot_longer(
             tidyselect::matches(match_pat),
             names_to=c('.value', 'year'),
