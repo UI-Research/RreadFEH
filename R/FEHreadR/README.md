@@ -19,12 +19,31 @@ You can install the development version of FEHreadR from
 devtools::install_github("UI-Research/RreadFEH/R/FEHreadR")
 ```
 
-## Example
+## Examples
+
+To read a binary file produced by FEH (fehdir needs to contain
+`dynasipp_header_even.dat` and `dynasipp_person_even.dat`):
+
+``` r
+
+library(FEHreadR)
+
+fname = "tmp.csv"
+widedf = read_feh(fehdir, obs_count=100)
+write.csv(widedf, fname)
+```
 
 To convert an FEH dataframe from wide to long format:
 
 ``` r
 library(FEHreadR)
 
+widedf = read.csv(fname) |>
+    dplyr::select(tidyselect::starts_with(c(
+        "PERNUM",
+        "EARNINGS",
+        "SAVINGS1"
+        ))
+    )
 longdf = feh_wide_to_long(widedf)
 ```
