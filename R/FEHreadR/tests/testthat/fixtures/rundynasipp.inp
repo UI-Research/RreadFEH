@@ -1,0 +1,357 @@
+;          
+; rundynasipp.inp          
+; 10/1/13          
+; input stream for Dynasim3 on Intel          
+;          
+; Comments are indicated by a ":" in the first column          
+;          
+; options here for the Dynasim run          
+; also see file options.dat for file and other parameters          
+;          
+;turn on option 2; Marry module debugs          
+;turn on option 3; Leave module debugs          
+;turn on option 4; Birth module debugs          
+;turn on option 5; Death module debugs          
+;turn on option 6; Cohabit module debugs          
+;turn on option 7; Divorce module debugs          
+;turn on option 8; Debug PART routine          
+;turn on option 9; Wage calculation debugs          
+;turn on option 10; HOURS debugs          
+;turn on option 11; HRSERN debugs          
+;turn on option 12; dump school variables          
+turn on option 13; Print back micro codebook          
+;turn on option 14; Dump families before          
+;turn on option 15; Dump families after          
+;turn on option 16; MATCH2 subroutine debugs          
+;turn on option 17; JOIN debugs          
+turn on option 18; Retain dead people in the population          
+;turn on option 19; Retain dead families in the population          
+turn on option 20; Take dead husbands record to the marriage mkt          
+;turn on option 21; dump longitudinal arrays          
+turn on option 30; Inhibit discouraged worker effect          
+turn on option 31; Produce shadow labor force data          
+turn on option 38; Use automatically computed adjustments in BIRTH          
+;turn on option 39; Turn on adjustments of LFP for SS claimants          
+;turn on option 40; Prevent use of error terms in WAGECALC          
+;turn on option 41; Use Vital Statistics for P lookup in MARRY          
+;turn on option 42; Zero out RHO values (serial r) in PART routine          
+turn on option 45; Use automatically computed adjustments in DEATH          
+;turn on option 46; Single Moms version using PARTSM, HOURSSM, WAGECSM          
+turn on option 47; Grant legal immigrant status       
+;turn on option 48; RAISE Act       
+turn on option 49; Ellis Island option, calls GETIMFAM          
+turn on option 50; Use automatically computed adjustments in MARRY          
+turn on option 51; LGB family formation          
+;turn on option 120; DMPFAM output turned off          
+;turn on option 121; IMM_DMPFAM output turned off          
+turn on option 122; Call PENMOD to run pension submodel          
+;turn on option 123; Call PENDMP to dump PENVARS data in PENMOD          
+turn on option 124; Call WEALTH to run wealth submodel          
+turn on option 125; Use sidewalk alignment in PART          
+;turn on option 126; Generate PERM randomly for all in PART          
+;turn on option 127; Use precomputed thresholds in PART          
+;turn on option 130; Allow YEARDBG to print all year variables for debugging          
+;turn off option 141; Black-White equal treatment in DEATH 
+;turn off option 142; Black-White equal treatment in DISAB/DISTAT 
+;turn off option 143; Black-White equal treatment in MARRY 
+;turn off option 144; Black-White equal treatment in SCHOOL 
+;turn off option 145; Black-White equal treatment in PART 
+;turn off option 146; Black-White equal treatment in WAGE 
+;turn off option 147; Black-White equal treatment in HEALTH 
+turn on option 148; New college model 
+;turn on option 149; Baby Bonds 
+turn on option 150; Student loan debt 
+;          
+; handy lists of persons for dumping, use in dynaparm.nml          
+;          
+;     DMPPER=   113445, 6894, 9039, 9040, 29202, 29203,          
+;          
+          
+openbank dyna2100;          
+set dbspan 1951-2100;          
+          
+         
+          
+          
+;          
+; BIRTH startup alignments for 2006 sample          
+;          
+ ALTER ABIRTH1 (2006) 1.16;
+ ALTER ABIRTH2 (2006) 1.37;
+ ALTER ABIRTH3 (2006) 1.12;
+ ALTER ABIRTH4 (2006) 0.99;
+ ALTER ABIRTH5 (2006) 0.88;
+      
+;            
+; Begin 2023 Trustees Assumptions load...            
+; Modified 6/15/2023 DSM            
+; Karen supplied these values, see run/ts/TA_23       
+;      
+;       
+ ALTER DETEST (1993)   6000;
+ ALTER DETEST (1994)   6000;
+ ALTER DETEST (1995)   6000;
+ ALTER DETEST (1996)   6000;
+ ALTER DETEST (1997)   6000;
+ ALTER DETEST (1998)   6000;
+ ALTER DETEST (1999)   8400;
+ ALTER DETEST (2000)   8400;
+ ALTER DETEST (2001)   8880;
+ ALTER DETEST (2002)   9360;
+ ALTER DETEST (2003)   9600;
+ ALTER DETEST (2004)   9720;
+ ALTER DETEST (2005)   9960;
+ ALTER DETEST (2006)  10320;
+ ALTER DETEST (2007)  10800;
+ ALTER DETEST (2008)  11280;
+ ALTER DETEST (2009)  11760;
+ ALTER DETEST (2010)  12000;
+ ALTER DETEST (2011)  12000;
+ ALTER DETEST (2012)  12120;
+ ALTER DETEST (2013)  12480;
+ ALTER DETEST (2014)  12840;
+ ALTER DETEST (2015)  13080;
+ ALTER DETEST (2016)  13560;
+ ALTER DETEST (2017)  14040;
+ ALTER DETEST (2018)  14160;
+ ALTER DETEST (2019)  14640;
+ ALTER DETEST (2020)  15120;
+ ALTER DETEST (2021)  15720;
+ ALTER DETEST (2022)  16200;
+ ALTER DETEST (2023)  17640;
+ ALTER DETEST (2024)  18600;
+ ALTER DETEST (2025)  19320;
+ ALTER DETEST (2026)  20040;
+ ALTER DETEST (2027)  20760;
+ ALTER DETEST (2028)  21600;
+ ALTER DETEST (2029)  22440;
+ ALTER DETEST (2030)  23520;
+ ALTER DETEST (2031)  24600;
+ ALTER DETEST (2032)  25560;
+ ALTER DETEST (2033)  26760;
+ ALTER DETEST (2034)  27960;
+ ALTER DETEST (2035)  29040;
+ ALTER DETEST (2036)  30120;
+ ALTER DETEST (2037)  31200;
+ ALTER DETEST (2038)  32280;
+ ALTER DETEST (2039)  33480;
+ ALTER DETEST (2040)  34800;
+ ALTER DETEST (2041)  36000;
+ ALTER DETEST (2042)  37320;
+ ALTER DETEST (2043)  38640;
+ ALTER DETEST (2044)  40080;
+ ALTER DETEST (2045)  41520;
+ ALTER DETEST (2046)  42960;
+ ALTER DETEST (2047)  44520;
+ ALTER DETEST (2048)  46080;
+ ALTER DETEST (2049)  47760;
+ ALTER DETEST (2050)  49440;
+ ALTER DETEST (2051)  51120;
+ ALTER DETEST (2052)  52920;
+ ALTER DETEST (2053)  54840;
+ ALTER DETEST (2054)  56760;
+ ALTER DETEST (2055)  58680;
+ ALTER DETEST (2056)  60840;
+ ALTER DETEST (2057)  63000;
+ ALTER DETEST (2058)  65160;
+ ALTER DETEST (2059)  67440;
+ ALTER DETEST (2060)  69840;
+ ALTER DETEST (2061)  72360;
+ ALTER DETEST (2062)  75000;
+ ALTER DETEST (2063)  77640;
+ ALTER DETEST (2064)  80400;
+ ALTER DETEST (2065)  83280;
+ ALTER DETEST (2066)  86280;
+ ALTER DETEST (2067)  89400;
+ ALTER DETEST (2068)  92520;
+ ALTER DETEST (2069)  95880;
+ ALTER DETEST (2070)  99240;
+ ALTER DETEST (2071) 102840;
+ ALTER DETEST (2072) 106560;
+ ALTER DETEST (2073) 110280;
+ ALTER DETEST (2074) 114240;
+ ALTER DETEST (2075) 118320;
+ ALTER DETEST (2076) 122520;
+ ALTER DETEST (2077) 126840;
+ ALTER DETEST (2078) 131400;
+ ALTER DETEST (2079) 136080;
+ ALTER DETEST (2080) 140880;
+ ALTER DETEST (2081) 145920;
+ ALTER DETEST (2082) 151080;
+ ALTER DETEST (2083) 156480;
+ ALTER DETEST (2084) 162120;
+ ALTER DETEST (2085) 167880;
+ ALTER DETEST (2086) 173880;
+ ALTER DETEST (2087) 180000;
+ ALTER DETEST (2088) 186480;
+ ALTER DETEST (2089) 193080;
+ ALTER DETEST (2090) 200040;
+ ALTER DETEST (2091) 207120;
+ ALTER DETEST (2092) 214440;
+ ALTER DETEST (2093) 222120;
+ ALTER DETEST (2094) 230040;
+ ALTER DETEST (2095) 238200;
+ ALTER DETEST (2096) 246600;
+ ALTER DETEST (2097) 255360;
+ ALTER DETEST (2098) 264480;
+ ALTER DETEST (2099) 273840;
+ ALTER DETEST (2100) 283560;
+ ALTER EARNTRG (1989)  4771.032;
+ ALTER EARNTRG (1990)  4744.043;
+ ALTER EARNTRG (1991)  4726.026;
+ ALTER EARNTRG (1992)  4829.185;
+ ALTER EARNTRG (1993)  4737.965;
+ ALTER EARNTRG (1994)  4748.044;
+ ALTER EARNTRG (1995)  4799.555;
+ ALTER EARNTRG (1996)  4893.713;
+ ALTER EARNTRG (1997)  5064.125;
+ ALTER EARNTRG (1998)  5259.432;
+ ALTER EARNTRG (1999)  5433.325;
+ ALTER EARNTRG (2000)  5540.748;
+ ALTER EARNTRG (2001)  5522.188;
+ ALTER EARNTRG (2002)  5501.552;
+ ALTER EARNTRG (2003)  5513.684;
+ ALTER EARNTRG (2004)  5622.941;
+ ALTER EARNTRG (2005)  5629.864;
+ ALTER EARNTRG (2006)  5706.819;
+ ALTER EARNTRG (2007)  5799.410;
+ ALTER EARNTRG (2008)  5699.550;
+ ALTER EARNTRG (2009)  5651.454;
+ ALTER EARNTRG (2010)  5667.864;
+ ALTER EARNTRG (2011)  5645.176;
+ ALTER EARNTRG (2012)  5701.240;
+ ALTER EARNTRG (2013)  5696.719;
+ ALTER EARNTRG (2014)  5810.922;
+ ALTER EARNTRG (2015)  6038.599;
+ ALTER EARNTRG (2016)  6047.499;
+ ALTER EARNTRG (2017)  6126.028;
+ ALTER EARNTRG (2018)  6190.478;
+ ALTER EARNTRG (2019)  6317.131;
+ ALTER EARNTRG (2020)  6418.059;
+ ALTER EARNTRG (2021)  6639.272;
+ ALTER EARNTRG (2022)  6446.707;
+ ALTER EARNTRG (2023)  6476.032;
+ ALTER EARNTRG (2024)  6544.276;
+ ALTER EARNTRG (2025)  6623.851;
+ ALTER EARNTRG (2026)  6727.468;
+ ALTER EARNTRG (2027)  6849.818;
+ ALTER EARNTRG (2028)  6996.956;
+ ALTER EARNTRG (2029)  7134.307;
+ ALTER EARNTRG (2030)  7269.573;
+ ALTER EARNTRG (2031)  7409.842;
+ ALTER EARNTRG (2032)  7553.976;
+ ALTER EARNTRG (2033)  7673.159;
+ ALTER EARNTRG (2034)  7768.538;
+ ALTER EARNTRG (2035)  7864.019;
+ ALTER EARNTRG (2036)  7960.950;
+ ALTER EARNTRG (2037)  8059.344;
+ ALTER EARNTRG (2038)  8159.578;
+ ALTER EARNTRG (2039)  8260.871;
+ ALTER EARNTRG (2040)  8361.734;
+ ALTER EARNTRG (2041)  8461.508;
+ ALTER EARNTRG (2042)  8560.988;
+ ALTER EARNTRG (2043)  8659.707;
+ ALTER EARNTRG (2044)  8757.500;
+ ALTER EARNTRG (2045)  8854.919;
+ ALTER EARNTRG (2046)  8951.471;
+ ALTER EARNTRG (2047)  9049.456;
+ ALTER EARNTRG (2048)  9148.012;
+ ALTER EARNTRG (2049)  9247.860;
+ ALTER EARNTRG (2050)  9349.123;
+ ALTER EARNTRG (2051)  9451.345;
+ ALTER EARNTRG (2052)  9555.691;
+ ALTER EARNTRG (2053)  9661.458;
+ ALTER EARNTRG (2054)  9768.644;
+ ALTER EARNTRG (2055)  9877.185;
+ ALTER EARNTRG (2056)  9987.083;
+ ALTER EARNTRG (2057) 10099.010;
+ ALTER EARNTRG (2058) 10212.825;
+ ALTER EARNTRG (2059) 10329.014;
+ ALTER EARNTRG (2060) 10447.283;
+ ALTER EARNTRG (2061) 10567.600;
+ ALTER EARNTRG (2062) 10689.239;
+ ALTER EARNTRG (2063) 10812.556;
+ ALTER EARNTRG (2064) 10936.761;
+ ALTER EARNTRG (2065) 11062.159;
+ ALTER EARNTRG (2066) 11188.103;
+ ALTER EARNTRG (2067) 11316.241;
+ ALTER EARNTRG (2068) 11445.339;
+ ALTER EARNTRG (2069) 11575.873;
+ ALTER EARNTRG (2070) 11708.083;
+ ALTER EARNTRG (2071) 11841.284;
+ ALTER EARNTRG (2072) 11975.243;
+ ALTER EARNTRG (2073) 12110.536;
+ ALTER EARNTRG (2074) 12247.421;
+ ALTER EARNTRG (2075) 12386.308;
+ ALTER EARNTRG (2076) 12526.886;
+ ALTER EARNTRG (2077) 12669.326;
+ ALTER EARNTRG (2078) 12812.998;
+ ALTER EARNTRG (2079) 12957.956;
+ ALTER EARNTRG (2080) 13104.389;
+ ALTER EARNTRG (2081) 13252.578;
+ ALTER EARNTRG (2082) 13402.486;
+ ALTER EARNTRG (2083) 13554.588;
+ ALTER EARNTRG (2084) 13708.957;
+ ALTER EARNTRG (2085) 13865.378;
+ ALTER EARNTRG (2086) 14024.533;
+ ALTER EARNTRG (2087) 14184.584;
+ ALTER EARNTRG (2088) 14345.850;
+ ALTER EARNTRG (2089) 14508.832;
+ ALTER EARNTRG (2090) 14673.046;
+ ALTER EARNTRG (2091) 14838.376;
+ ALTER EARNTRG (2092) 15005.140;
+ ALTER EARNTRG (2093) 15173.515;
+ ALTER EARNTRG (2094) 15343.526;
+ ALTER EARNTRG (2095) 15515.428;
+ ALTER EARNTRG (2096) 15688.966;
+ ALTER EARNTRG (2097) 15864.377;
+ ALTER EARNTRG (2098) 16041.979;
+ ALTER EARNTRG (2099) 16221.369;
+ ALTER EARNTRG (2100) 16402.778;
+   
+       
+;            
+; End of 2023 Trustees Assumptions load...            
+          
+SET RANGE 1992-2087;          
+type series : LASTFAM;          
+type series : LASTPER;          
+          
+          
+          
+          
+; test for new 2100 databank 6/24/18          
+set range 1951-2100;          
+type series: windex;      
+type series: pindex;       
+      
+set range 1958-2000;       
+         
+type series: marrdf;          
+type series: UNEMPRAT;          
+; MARRY alignment TS          
+;       
+type list: MARRYTRG;      
+          
+; simulate here!            
+      
+simulate 2007 through 2100;        
+          
+          
+SET RANGE 1992-2010;          
+type series : LASTFAM;          
+type series : LASTPER;          
+          
+;      
+; DSM 8/13/18         
+; Time series "type" command is working now      
+;      
+set range 1993-2093;          
+type series: SSMAXEMP;          
+type series # 5 : MINWAGE;          
+      
+type series # 5 : EARNTRG, EARNADJ, EARNRAT, EARNPOP, EARNXPR;          
+SHOW INDEX;         
+;          
+         
+end;           

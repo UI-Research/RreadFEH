@@ -354,7 +354,7 @@ read_header = function(hdrfile)
 #' @return data frame with FEH data
 #'
 #' @export
-read_feh = function(fehdir, suffix="even", person=TRUE, columns=NULL, obs_count=NA)
+feh_read = function(fehdir, suffix="even", person=TRUE, columns=NULL, obs_count=NA)
 {
     if( is.null(suffix) ) {
         year_sfx = ""
