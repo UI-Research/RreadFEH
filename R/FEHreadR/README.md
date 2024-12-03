@@ -47,3 +47,26 @@ widedf = read.csv(fname) |>
     )
 longdf = feh_wide_to_long(widedf)
 ```
+
+To read alter statements from an FEH input file:
+
+``` r
+library(FEHreadR)
+
+df = feh_read_alters(fname)
+```
+
+To update alter statements from an FEH input file and create a new input
+file:
+
+``` r
+library(FEHreadR)
+
+alterdf = data.frame(
+    TSNAME="EARNTRG",
+    YEAR=2025:2030,
+    VALUE=50000
+)
+
+df = feh_update_alters(alterdf, infname, outfname)
+```
