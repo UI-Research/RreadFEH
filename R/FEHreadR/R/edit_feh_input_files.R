@@ -84,13 +84,13 @@ print_diff <- function(df)
     not_in <-df[is.na(df$VALUE.x), c("TSNAME","YEAR")]
     not_tr <- df[is.na(df$VALUE.y), c("TSNAME","YEAR")]
 
-    print("Values in the Trustees assumptions, but not in the input file")
+    print("Values in new ALTER data, but not in the current input file")
     for(i in not_in_ts) {
         print(i)
         print(not_in[not_in$TSNAME==i,"YEAR"])
     }
 
-    print("Values in the input file, but not in the Trustees assumptions")
+    print("Values in the current input file, but not in new ALTER data")
     for(i in not_tr_ts) {
         print(i)
         print(not_tr[not_tr$TSNAME==i,"YEAR"])
