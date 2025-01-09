@@ -14,7 +14,7 @@ where = ["src"]
 
 [project]
 name = "feh_io"
-version = "1.0.0"
+version = "1.0.1"
 description = "A package to read and write data from DYNASIM FEH files"
 authors = [{name = "Thiya Poongundranar", email = "tpoongundranar@urban.org"},
            {name = "Jameson Carter", email = "jamcarter@urban.org" }]
