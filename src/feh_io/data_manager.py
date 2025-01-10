@@ -24,19 +24,19 @@ class DataManager:
     
     def get_projects(self):
         response = requests.get(f"{self.url_base}/projects/", headers=self.headers)
-        return response
+        return response.json()
 
     def get_scenarios(self):
         response = requests.get(f"{self.url_base}/scenarios/", headers=self.headers)
-        return response
+        return response.json()
 
     def get_scenarios_for_project(self, project_id):
         response = requests.get(f"{self.url_base}/projects/{project_id}/scenarios/", headers=self.headers)
-        return response
+        return response.json()
 
     def get_variables_for_project(self, project_id):
         response = requests.get(f"{self.url_base}/projects/{project_id}/variables/", headers=self.headers)
-        return response
+        return json.loads(json.loads(response.text))
 
     def generate_dataset(self, project_name, scenarios, family_variables=[], person_variables=[],
         birth_year_range=[], year_range=[]):
@@ -69,7 +69,7 @@ class DataManager:
         try:
             response = requests.post(f"{self.url_base}generate-dataset/", headers=self.headers, json=payload)
             response.raise_for_status()
-            return response
+            return response.json()
         except requests.exceptions.HTTPError as e:
             raise e
 
@@ -80,7 +80,7 @@ class DataManager:
         except requests.exceptions.HTTPError as e:
             print(e)
 
-        return response
+        return response.json()
 
     def download_file(self, presigned_url, output_path):
         data_type = ""
@@ -104,7 +104,7 @@ class DataManager:
                     print("File successfully downloaded.")
         except Exception as e:
             print(e)
-            print(f"Failed to download file. Status code: {response.status_code}")
+            print(f"Failed to download file")
     
     def get_dataset(self, output_dir, file_type, project_name, scenarios,
         family_variables=[], person_variables=[], birth_year_range=[], year_range=[]):
@@ -131,7 +131,6 @@ class DataManager:
             print("generate_dataset() failed. Please try again.")
             raise e
 
-        response = response.json()
         job_id = response.get('job_id')
         print(f"Job successfully submitted. Job ID: {job_id}")
 
@@ -143,7 +142,6 @@ class DataManager:
         while job_status != "SUCCEEDED": 
             time.sleep(5)
             response1 = self.get_dataset_status(job_id, file_type)
-            response1 = response1.json()
             job_status = response1['job_status']
             print(job_status)
             if job_status in ["STOPPED", "FAILED", "ERROR", "TIMEOUT"]:

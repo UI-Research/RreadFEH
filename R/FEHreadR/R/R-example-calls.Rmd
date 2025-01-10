@@ -1,0 +1,116 @@
+---
+title: "R example calls"
+output: pdf_document
+date: "2025-01-03"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Set working directory and load in api methods
+```{r}
+setwd(dirname(getwd()))
+source("./data-manager-main.R")
+```
+
+Connect to server
+```{r}
+email <- "email@urban.org"
+password <- "password123"
+email<- "epark@urban.org"
+password <- "G8mw:iZj2;*Gy~e"
+headers <- connect(email, password)
+```
+
+List projects
+```{r}
+r <- list_projects()
+print(fromJSON(content(r, "text")))
+```
+
+List scenarios for a project by project id
+```{r}
+r <- list_scenarios(1)
+print(fromJSON(content(r, "text")))
+```
+
+List variables for a project by project id
+```{r}
+r <- list_variables(1)
+vars <- fromJSON(content(r, "text"))
+print(vars)
+```
+
+Request a subset of data
+```{r}
+project_name = "BabyBonds"
+scenario_names = list("Baseline_v1")
+person_variables = list("perid", "race", "sex", "year_died", "earnings")
+family_variables = list("fam_id", "numkids", "immigration_year")
+birth_year_range = list(1950, 2100) # optional
+year_range = list(1950, 2100) # optional
+
+response <- generate_dataset(
+  project_name=project_name,
+  scenarios=scenario_names,
+  family_variables=family_variables,
+  person_variables=person_variables,
+  birth_year_range=birth_year_range,
+  year_range=year_range
+)
+
+print(status_code(response))
+print(content(response))
+
+# Retrieve job_id from response
+job_id <- content(response)$job_id
+```
+
+Get status of the requested dataset
+```{r}
+file_type <- "csv" # only `csv` or `parquet` allowed
+
+response <- get_dataset_status(job_id, file_type)
+print(status_code(response))
+print(content(response))
+
+# Get family and person presigned urls
+
+family_url <- content(response)$family_url
+person_url <- content(response)$person_url
+```
+
+
+```{r}
+# Download files locally
+download_files(family_url, "/path/to/local/download/family_file.zip") # only .zip or .pq
+download_files(person_url, "/path/to/local/download/person_file.zip") # only .zip or .pq
+```
+
+
+Request and download datasets
+Calls the above functions and saves the data as family_data.ext or person_data.ext
+```{r}
+project_name = "BabyBonds"
+scenario_names = list("Baseline_v1")
+person_variables = list("perid", "race", "sex", "year_died", "earnings")
+family_variables = list("fam_id", "numkids", "immigration_year")
+birth_year_range = list() # optional
+year_range = list() # optional
+
+file_type = "csv" # `csv` or `parquet` only
+output_dir = "/Users/epark/Downloads"
+
+request_and_download_datasets(
+    file_type=file_type,
+    output_dir=output_dir, 
+    project_name=project_name,
+    scenarios=scenario_names,
+    family_variables=family_variables,
+    person_variables=person_variables,
+    birth_year_range=birth_year_range,
+    year_range=year_range
+  ) 
+```
+
