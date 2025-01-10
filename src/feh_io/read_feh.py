@@ -15,6 +15,7 @@ It requires paths to a header file and to one of the two data files.
 
 import struct
 import numpy as np
+import pandas as pd
 import io
 import numpy.lib.recfunctions as rf
 import pyarrow.parquet as pq # for parquet file format
@@ -248,7 +249,46 @@ def read_feh_data_file(
     
     return data
 
-def feh_wide_to_long(widearr):
+def feh_wide_to_long(data):
+    """Converts wide DYNASIM data to a long format
+
+    Args:
+        data (np.array|pd.DataFrame): structured numpy array or dataframe with longitudinal variables and "PERNUM"
+
+    Returns:
+        structured numpy array|pd.DataFrame: long-format data with longitudinal variables from data
+    """
+
+    if isinstance(data, pd.DataFrame):
+        return __feh_wide_to_long_pd(data)
+    else:
+        return __feh_wide_to_long_numpy(data)
+
+
+def __feh_wide_to_long_pd(df):
+    """Creates a long-format array for longitudinal variables in df
+
+    Args:
+        df (pd.DataFrame): pandas dataframe with longitudinal variables and "perid"
+
+    Returns:
+        pd.DataFrame: long-format dataframe with longitudinal variables from df
+    """
+    mtswide = [x for x in df.columns if x[-4:].isdigit()]
+    stubnames = list(set([x[:-4] for x in  mtswide]))
+    
+    if len(stubnames) <= 0:
+        raise TypeError("Dataframe has no longitudinal variables")
+    
+    scalars = set(df.columns).difference(mtswide)
+
+    if 'perid' not in scalars:
+        raise TypeError("Dataframe has no perid variable")
+
+    return(pd.wide_to_long(df, stubnames=stubnames, i=scalars, j='year').reset_index())
+
+
+def __feh_wide_to_long_numpy(widearr):
     """Creates a long-format array for longitudinal variables in widearr
 
     Args:
