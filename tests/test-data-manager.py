@@ -1,7 +1,8 @@
-# To run, from data-manager, use `pytest tests/tests.py`
-# To see print output and verbose output, use `pytest tests/tests.py -sv`
+# To run, from data-manager, use `pytest tests/test-data-manager.py`
+# To see print output and verbose output, use `pytest tests/test-data-manager.py -sv`
+
 import pytest
-from python_src.DataManager import DataManager
+from src.feh_io import DataManager
 import os
 from dotenv import load_dotenv
 import pandas as pd
