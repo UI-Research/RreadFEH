@@ -10,8 +10,11 @@ knitr::opts_chunk$set(echo = TRUE)
 
 Set working directory and load in api methods
 ```{r}
-library(roxygen2)
-roxygen2::load_pkgload("./FEHreadR")
+# library(roxygen2)
+# roxygen2::load_pkgload("./FEHreadR")
+# OR
+# install.packages("devtools")
+# devtools::install_github("UI-Research/RreadFEH/R/FEHreadR")
 library(FEHreadR)
 ```
 
