@@ -6,7 +6,7 @@
 # - version="1.0.0" -> version="2.0.0" for a major change that breaks compatability with the previous version
 
 [build-system]
-requires = ["setuptools>=72.1.0", "wheel"]
+requires = ["setuptools>=68.0", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [tool.setuptools.packages.find]
@@ -14,12 +14,12 @@ where = ["src"]
 
 [project]
 name = "feh_io"
-version = "1.0.2"
+version = "1.0.3"
 description = "A package to read and write data from DYNASIM FEH files"
 authors = [{name = "Thiya Poongundranar", email = "tpoongundranar@urban.org"},
            {name = "Jameson Carter", email = "jamcarter@urban.org" }]
 readme = "README.md"
-requires-python = '>=3.12.4'
+requires-python = '>=3.7'
 license = { text = "MIT" }
 classifiers = [
     "Programming Language :: Python :: 3",
