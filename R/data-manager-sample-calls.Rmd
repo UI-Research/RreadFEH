@@ -129,6 +129,6 @@ dm_request_and_download_datasets(
     person_variables=person_variables,
     birth_year_range=birth_year_range,
     year_range=year_range
-  ) 
+  )
 ```
 

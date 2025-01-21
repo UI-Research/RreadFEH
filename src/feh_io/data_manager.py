@@ -155,7 +155,7 @@ class DataManager:
 
             elapsed_time = time.time() - start_time
             if elapsed_time > timeout:
-                print(f"Timeout reached (10 min), stopping program for job id {job_id}.")
+                print(f"Timeout reached after 10 min. Stopping program for job id {job_id}.")
                 break
     
         if ('family_url' not in response1 and 'person_url' not in response1): # in case of timeout

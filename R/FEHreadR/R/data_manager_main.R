@@ -232,6 +232,10 @@ dm_request_and_download_datasets <- function(
   print(glue("Initiating job {job_id}"))
   job_status <- "PENDING"
 
+  # have function time out after 10 minutes
+  timeout_duration <- 10 * 60
+  start_time <- Sys.time()
+
   while (job_status != "SUCCEEDED") {
     Sys.sleep(5)
     response1 <- dm_get_dataset_status(job_id=job_id, file_type=file_type)
@@ -241,9 +245,18 @@ dm_request_and_download_datasets <- function(
       print(http_status(response1)$message)
       stop(glue("Job {job_id} has failed with status {job_status}"))
     }
+    elapsed_time <- as.numeric(difftime(Sys.time(), start_time, units = "secs"))
+    if (elapsed_time > timeout_duration) {
+        print(glue("Timeout reached after 10 min. Stopping program for job id {job_id}"))
+        break
+    }
   }
-  family_url <- response1$family_url
-  person_url <- response1$person_url
+  if ('family_url' %in% names(response1)) {
+      family_url <- response1$family_url
+      person_url <- response1$person_url
+  } else {
+      stop("Could not retrieve family and person URLs. Please try again or check back later.")
+  }
 
   if (file_type=="csv") {
     dm_download_file(family_url, file.path(output_dir, "family_data.zip"))
