@@ -110,7 +110,7 @@ class DataManager:
             print(e)
             print(f"Failed to download file")
     
-    def get_dataset(self, output_dir, file_type, project_name, scenarios,
+    def request_and_download_datasets(self, output_dir, file_type, project_name, scenarios,
         family_variables=[], person_variables=[], birth_year_range=[], year_range=[]):
         print("Generating request...")
 
