@@ -127,7 +127,7 @@ dm_generate_dataset <- function(
 
   payload = list(
     project_name = project_name,
-    scenarios = scenarios,
+    scenarios = as.list(scenarios),
     person_variables = person_variables,
     family_variables = family_variables,
     birth_year_range = birth_year_range,
@@ -222,7 +222,7 @@ dm_request_and_download_datasets <- function(
 
   response <- dm_generate_dataset(
     project_name=project_name,
-    scenarios=scenarios,
+    scenarios=as.list(scenarios),
     family_variables=family_variables,
     person_variables=person_variables,
     birth_year_range=birth_year_range,
