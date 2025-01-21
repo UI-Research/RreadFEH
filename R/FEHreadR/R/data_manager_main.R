@@ -37,6 +37,17 @@ dm_get_projects <- function() {
     return(fromJSON(content(response, as="text", encoding="UTF-8")))
 }
 
+#' Retrieves a single project using its project_id
+#'
+#' @return A dataframe of project information
+#' @export
+dm_get_project <- function(project_id) {
+    url <- paste0("https://dynasim-data-manager.urban.org/api/projects/", project_id)
+    response <- GET(
+        url,
+        add_headers(Authorization = glue("{headers}")))
+    return(fromJSON(content(response, as="text", encoding="UTF-8")))
+}
 
 #' Retrieves all scenarios
 #'

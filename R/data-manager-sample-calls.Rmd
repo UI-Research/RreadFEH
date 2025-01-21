@@ -32,6 +32,13 @@ projects <- dm_get_projects()
 print(projects)
 ```
 
+Get a specific project
+```{r}
+project_id <- 1
+project_info <- dm_get_project(project_id)
+print(project_info)
+```
+
 Get scenarios
 ```{r}
 scenarios <- dm_get_scenarios()

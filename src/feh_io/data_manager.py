@@ -26,6 +26,10 @@ class DataManager:
         response = requests.get(f"{self.url_base}/projects/", headers=self.headers)
         return response.json()
 
+    def get_project(self, project_id):
+        response = requests.get(f"{self.url_base}/projects/{project_id}", headers=self.headers)
+        return response.json()
+
     def get_scenarios(self):
         response = requests.get(f"{self.url_base}/scenarios/", headers=self.headers)
         return response.json()
