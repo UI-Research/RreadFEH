@@ -229,7 +229,7 @@ dm_request_and_download_datasets <- function(
     year_range=year_range)
 
   job_id <- response$job_id
-  print(glue("Initiating job {job_id}"))
+  print(glue("Job successfully submitted. Job ID: {job_id}"))
   job_status <- "PENDING"
 
   # have function time out after 10 minutes

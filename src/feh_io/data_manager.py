@@ -112,7 +112,6 @@ class DataManager:
     
     def request_and_download_datasets(self, output_dir, file_type, project_name, scenarios,
         family_variables=[], person_variables=[], birth_year_range=[], year_range=[]):
-        print("Generating request...")
 
         if not os.path.exists(output_dir):
             print("Error: Does the provided output dir exist?")
