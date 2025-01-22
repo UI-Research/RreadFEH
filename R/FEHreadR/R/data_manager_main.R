@@ -236,6 +236,7 @@ dm_request_and_download_datasets <- function(
   timeout_duration <- 10 * 60
   start_time <- Sys.time()
 
+  print("Checking status...")
   while (job_status != "SUCCEEDED") {
     Sys.sleep(5)
     response1 <- dm_get_dataset_status(job_id=job_id, file_type=file_type)
