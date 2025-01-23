@@ -6,9 +6,11 @@
 If the dataset has successfully generated, dm_get_dataset_status() will
 return download links to family and person data files.}
 \usage{
-dm_get_dataset_status(job_id, file_type)
+dm_get_dataset_status(con, job_id, file_type)
 }
 \arguments{
+\item{con}{A list of connection information}
+
 \item{job_id, }{integer}
 
 \item{file_type, }{character. 'csv' or 'parquet' ONLY}

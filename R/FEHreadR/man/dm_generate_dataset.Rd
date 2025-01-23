@@ -5,6 +5,7 @@
 \title{Requests a dataset to be generated using the requested parameters}
 \usage{
 dm_generate_dataset(
+  con,
   project_name,
   scenarios,
   family_variables = list(),
@@ -14,6 +15,8 @@ dm_generate_dataset(
 )
 }
 \arguments{
+\item{con}{A list of connection information}
+
 \item{project_name, }{character}
 
 \item{scenarios, }{list of characters}

@@ -4,7 +4,10 @@
 \alias{dm_get_project}
 \title{Retrieves a single project using its project_id}
 \usage{
-dm_get_project(project_id)
+dm_get_project(con, project_id)
+}
+\arguments{
+\item{con}{A list of connection information}
 }
 \value{
 A dataframe of project information

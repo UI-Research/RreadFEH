@@ -4,7 +4,10 @@
 \alias{dm_get_scenarios}
 \title{Retrieves all scenarios}
 \usage{
-dm_get_scenarios()
+dm_get_scenarios(con)
+}
+\arguments{
+\item{con}{A list of connection information}
 }
 \value{
 A dataframe of scenarios
