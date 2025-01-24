@@ -23,39 +23,39 @@ Connect to server
 email <- "email@urban.org"
 password <- "password123"
 
-headers <- dm_connect(email, password)
+con <- dm_connect(email, password)
 ```
 
 Get projects
 ```{r}
-projects <- dm_get_projects()
+projects <- dm_get_projects(con)
 print(projects)
 ```
 
 Get a specific project
 ```{r}
 project_id <- 1
-project_info <- dm_get_project(project_id)
+project_info <- dm_get_project(con, project_id)
 print(project_info)
 ```
 
 Get scenarios
 ```{r}
-scenarios <- dm_get_scenarios()
+scenarios <- dm_get_scenarios(con)
 print(scenarios)
 ```
 
 Get scenarios for a project by project id
 ```{r}
 project_id <- 1
-scenarios1 <- dm_get_scenarios_for_project(project_id)
+scenarios1 <- dm_get_scenarios_for_project(con, project_id)
 print(scenarios1)
 ```
 
 Get variables for a project by project id
 ```{r}
 project_id <- 1
-variables <- dm_get_variables_for_project(project_id)
+variables <- dm_get_variables_for_project(con, project_id)
 
 family_variables <- as.data.frame(variables[1, 'var_definitions'])
 person_variables <- as.data.frame(variables[2, 'var_definitions'])
@@ -74,6 +74,7 @@ birth_year_range = list(1950, 2100) # optional
 year_range = list(1950, 2100) # optional
 
 response <- dm_generate_dataset(
+  con,
   project_name=project_name,
   scenarios=scenario_names,
   family_variables=family_variables,
@@ -92,7 +93,7 @@ Get status of the requested dataset
 ```{r}
 file_type <- "csv" # only `csv` or `parquet` allowed
 
-response <- dm_get_dataset_status(job_id, file_type)
+response <- dm_get_dataset_status(con, job_id, file_type)
 
 # Get family and person presigned urls once job_status=="SUCCEEDED"
 family_url <- response$family_url
@@ -121,6 +122,7 @@ file_type = "csv" # `csv` or `parquet` only
 output_dir = "/users/local/downloads"
 
 dm_request_and_download_datasets(
+    con,
     file_type=file_type,
     output_dir=output_dir, 
     project_name=project_name,

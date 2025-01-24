@@ -4,9 +4,11 @@
 \alias{dm_get_variables_for_project}
 \title{Retrieves the variables for a project}
 \usage{
-dm_get_variables_for_project(project_id)
+dm_get_variables_for_project(con, project_id)
 }
 \arguments{
+\item{con}{A list of connection information}
+
 \item{project_id, }{integer identifier for a project}
 }
 \value{

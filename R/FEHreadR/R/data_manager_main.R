@@ -14,73 +14,81 @@ dm_connect <- function(email, password) {
     password = password
   )
 
-  url <- 'https://dynasim-data-manager.urban.org/api/users/login/'
-  response = POST(url,
+  url_base <- 'https://dynasim-data-manager.urban.org/api'
+
+  response = POST(paste0(url_base, '/users/login/'),
                   body=user_account,
                   encode="json")
   user_token <- content(response)$token
-  headers <- list(
-    Authorization = glue("Token {user_token}")
+  connection <- list(
+      url_base = url_base,
+      token = glue("Token {user_token}")
   )
-  return(headers)
+  return(connection)
+
 }
 
 #' Retrieves all projects in the data manager
 #'
+#' @param con A list of connection information
 #' @return A dataframe of projects
 #' @export
-dm_get_projects <- function() {
-    url <- "https://dynasim-data-manager.urban.org/api/projects/"
+dm_get_projects <- function(con) {
+    url <- paste0(con$url_base, "/projects/")
     response <- GET(
         url,
-        add_headers(Authorization = glue("{headers}")))
+        add_headers(Authorization = con$token))
     return(fromJSON(content(response, as="text", encoding="UTF-8")))
 }
 
 #' Retrieves a single project using its project_id
 #'
+#' @param con A list of connection information
 #' @return A dataframe of project information
 #' @export
-dm_get_project <- function(project_id) {
-    url <- paste0("https://dynasim-data-manager.urban.org/api/projects/", project_id)
+dm_get_project <- function(con, project_id) {
+    url <- paste0(con$url_base, "/projects/", project_id)
     response <- GET(
         url,
-        add_headers(Authorization = glue("{headers}")))
+        add_headers(Authorization = con$token))
     return(fromJSON(content(response, as="text", encoding="UTF-8")))
 }
 
 #' Retrieves all scenarios
 #'
+#' @param con A list of connection information
 #' @return A dataframe of scenarios
 #' @export
-dm_get_scenarios <- function() {
-    url <- "https://dynasim-data-manager.urban.org/api/scenarios/"
+dm_get_scenarios <- function(con) {
+    url <- paste0(con$url_base, "/scenarios/")
     response <- GET(url,
-                    add_headers(Authorization = glue("{headers}")))
+                    add_headers(Authorization = con$token))
     return(fromJSON(content(response, as="text", encoding="UTF-8")))
 }
 
 #' Retrieves the scenarios for a project
 #'
+#' @param con A list of connection information
 #' @param project_id, integer identifier for a project
 #' @return A dataframe of scenarios
 #' @export
-dm_get_scenarios_for_project <- function(project_id) {
-  url <- glue("https://dynasim-data-manager.urban.org/api/projects/{project_id}/scenarios/")
+dm_get_scenarios_for_project <- function(con, project_id) {
+  url <- paste0(con$url_base, "/projects/", project_id, "/scenarios/")
   response <-  GET(url,
-          add_headers(Authorization = glue("{headers}")))
+          add_headers(Authorization = con$token))
   return(fromJSON(content(response, as="text", encoding="UTF-8")))
 }
 
 #' Retrieves the variables for a project
 #'
+#' @param con A list of connection information
 #' @param project_id, integer identifier for a project
 #' @return a dataframe containing family and person variables as dataframes
 #' @export
-dm_get_variables_for_project <- function(project_id) {
-  url <- glue("https://dynasim-data-manager.urban.org/api/projects/{project_id}/variables/")
+dm_get_variables_for_project <- function(con, project_id) {
+  url <- paste0(con$url_base, "/projects/", project_id, "/variables/")
   response <- GET(url,
-          add_headers(Authorization = glue("{headers}")))
+          add_headers(Authorization = con$token))
   variables <- fromJSON(fromJSON(content(response, as="text", encoding="UTF-8")))
   return(variables)
 }
@@ -88,6 +96,7 @@ dm_get_variables_for_project <- function(project_id) {
 
 #' Requests a dataset to be generated using the requested parameters
 #'
+#' @param con A list of connection information
 #' @param project_name, character
 #' @param scenarios, list of characters
 #' @param family_variables, list of characters
@@ -97,6 +106,7 @@ dm_get_variables_for_project <- function(project_id) {
 #' @return a list of characters containing a job_id and message
 #' @export
 dm_generate_dataset <- function(
+    con,
     project_name,
     scenarios,
     family_variables=list(),
@@ -123,7 +133,7 @@ dm_generate_dataset <- function(
     return(NULL)
   }
 
-  url <- "https://dynasim-data-manager.urban.org/api/generate-dataset/"
+  url <- paste0(con$url_base, "/generate-dataset/")
 
   payload = list(
     project_name = project_name,
@@ -140,7 +150,7 @@ dm_generate_dataset <- function(
     response <- POST(
       url,
       add_headers(
-        Authorization = glue("{headers}"),
+        Authorization = con$token,
         "Content-Type" = "application/json"
       ),
       body=json_payload)
@@ -160,17 +170,18 @@ dm_generate_dataset <- function(
 #' If the dataset has successfully generated, dm_get_dataset_status() will
 #' return download links to family and person data files.
 #'
+#' @param con A list of connection information
 #' @param job_id, integer
 #' @param file_type, character. 'csv' or 'parquet' ONLY
 #' @return a list
 #' @export
-dm_get_dataset_status <- function(job_id, file_type) {
+dm_get_dataset_status <- function(con, job_id, file_type) {
   if (!(file_type %in% c("csv", "parquet"))) {
     stop("file_type must be 'csv' or 'parquet'")
   }
-    url <- glue("https://dynasim-data-manager.urban.org/api/dataset-status/{job_id}/{file_type}/")
+    url <- paste0(con$url_base, "/dataset-status/", job_id, "/", file_type, "/")
     response <- GET(url,
-          add_headers(Authorization = glue("{headers}")))
+          add_headers(Authorization = con$token))
   return(fromJSON(content(response, as="text", encoding="UTF-8")))
 }
 
@@ -196,6 +207,7 @@ dm_download_file <- function(presigned_url, output_path) {
 #' Requests and downloads a dataset using dm_generate_dataset(),
 #' dm_get_dataset_status(), and dm_download_file
 #'
+#' @param con A list of connection information
 #' @param file_type, 'csv' or 'parquet' ONLY
 #' @param output_dir, character
 #' @param project_name, character
@@ -206,6 +218,7 @@ dm_download_file <- function(presigned_url, output_path) {
 #' @param year_range, list of integers
 #' @export
 dm_request_and_download_datasets <- function(
+    con,
     file_type,
     output_dir,
     project_name,
@@ -221,6 +234,7 @@ dm_request_and_download_datasets <- function(
   }
 
   response <- dm_generate_dataset(
+    con,
     project_name=project_name,
     scenarios=as.list(scenarios),
     family_variables=family_variables,
@@ -239,7 +253,7 @@ dm_request_and_download_datasets <- function(
   print("Checking status...")
   while (job_status != "SUCCEEDED") {
     Sys.sleep(5)
-    response1 <- dm_get_dataset_status(job_id=job_id, file_type=file_type)
+    response1 <- dm_get_dataset_status(con, job_id=job_id, file_type=file_type)
     job_status <- response1$job_status
     print(job_status)
     if (!(job_status %in% c("SUCCEEDED", "RUNNING", "STARTING", "WAITING"))) {

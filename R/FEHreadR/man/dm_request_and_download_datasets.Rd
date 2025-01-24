@@ -6,6 +6,7 @@
 dm_get_dataset_status(), and dm_download_file}
 \usage{
 dm_request_and_download_datasets(
+  con,
   file_type,
   output_dir,
   project_name,
@@ -17,6 +18,8 @@ dm_request_and_download_datasets(
 )
 }
 \arguments{
+\item{con}{A list of connection information}
+
 \item{file_type, }{'csv' or 'parquet' ONLY}
 
 \item{output_dir, }{character}

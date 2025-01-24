@@ -4,7 +4,10 @@
 \alias{dm_get_projects}
 \title{Retrieves all projects in the data manager}
 \usage{
-dm_get_projects()
+dm_get_projects(con)
+}
+\arguments{
+\item{con}{A list of connection information}
 }
 \value{
 A dataframe of projects
