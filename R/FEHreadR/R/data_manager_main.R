@@ -6,7 +6,7 @@ library(glue)
 #'
 #' @param email character, email address for data manager
 #' @param password character, password for data manager
-#' @return A list of characters
+#' @return A list of characters containing the url_base and auth token
 #' @export
 dm_connect <- function(email, password) {
   user_account <- list(

@@ -12,7 +12,7 @@ dm_connect(email, password)
 \item{password}{character, password for data manager}
 }
 \value{
-A list of characters
+A list of characters containing the url_base and auth token
 }
 \description{
 Connects to the data manager and returns an auth token
