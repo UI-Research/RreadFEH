@@ -23,47 +23,13 @@ famdata = feh_io.read_feh_data_file(header_file, family_file, file_type='family'
 ```
 
 ## R
-For the R reader, its main piece is the code in `read_codebook.R` that reads DYNASIM's codebook and constructs column names for the data frame. 
 
-DYNASIM codebook specifies the logical layout of the person and family records. A record generally includes so called *static* variables, which contain a single value, and *micro time-series*, which contain values for a range of years. For each variable on a record, the codebook specifies its name, starting position, and end position. For micro time-series, the codebook also specifies the year range.
-
-> [!IMPORTANT]
-> All variables are 32-bit integers. The values of starting and ending position of a variable are not used.
-
-A sample codebook is in `codebook_2087ds.sipp2006`. To obtain column names, execute the following code:
+To install the R package, execute the following command:
 
 ```
-library(tidyverse)
-source("read_codebook.R")
-rec_struct <- get_col_names(paste0(here::here(), '/codebook_2087ds.sipp2006'))
+# If you don't have "devtools", first install this package
+# install.packages("devtools")
+
+devtools::install_github("UI-Research/RreadFEH/R/FEHreadR")
+
 ```
-
-The `read_feh.R` file contains code that reads a DYNASIM output file, but this repo does not contain any sample output files.
-
-## Data
-
-### Sex
-
-Sex is encoded in variable SEX.
-
-* Men:   SEX==1
-* Women: SEX==2
-
-### Race and Ethnicity
-
-Race and ethnicity are encoded in variable ETHNCTY.
-
-* Asian:    4000 <= ETHNCTY <= 4999
-* Black:    2000 <= ETHNCTY <= 2999
-* Hispanic: 
-  * 1014 <= ETHNCTY <= 1020 or
-  * 2014 <= ETHNCTY <= 2020 or
-  * 3014 <= ETHNCTY <= 3020 or 
-  * 4014 <= ETHNCTY <= 4020
-* White:    1000 <= ETHNCTY <= 1999            
-* Other:    3000 <= ETHNCTY <= 3999
-
-### Education
-
-Educational attainment is encoded in the vector GRADECAT as the number of completed grades. It can take values from 0 to 18.
-
