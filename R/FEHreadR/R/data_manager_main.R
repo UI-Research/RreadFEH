@@ -1,6 +1,7 @@
-library(httr)
-library(jsonlite)
-library(glue)
+#' @importFrom jsonlite fromJSON toJSON
+#' @importFrom httr POST GET add_headers content status_code
+#' @importFrom glue glue
+NULL
 
 #' Connects to the data manager and returns an auth token
 #'
