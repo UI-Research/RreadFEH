@@ -39,7 +39,7 @@ dependencies = [
     "six >= 1.16.0",
     "tzdata >= 2024.1",
     "pytest>=7.4.4",
-    "requests>=2.32.3", 
+    "requests>=2.31.0", 
     "fastparquet>=0.8.1",
 ]
 
