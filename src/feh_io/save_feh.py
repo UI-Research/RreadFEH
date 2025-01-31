@@ -38,7 +38,7 @@ def save_feh_parquet(data, out_path:str, filename:str):
     
     Use a filepath for the out_path argument relative to the current directory: {os.getcwd()}.
 
-    For example, if you want to save in '{os.getcwd().replace('\\', '/')}/data/output/' use 'data/output/'.
+    For example, if you want to save in '{os.getcwd().replace(chr(92), '/')}/data/output/' use 'data/output/'.
     """
     # Convert the NumPy structured array to a PyArrow Table- does not natively support structured numpy arrays
     # first part collects the field names and data types from the structured array
