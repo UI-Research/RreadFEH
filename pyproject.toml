@@ -41,7 +41,6 @@ dependencies = [
     "pytest>=7.4.4",
     "requests>=2.32.3", 
     "fastparquet>=0.8.1",
-    "pytest>=8.3.4"
 ]
 
 [project.urls]
